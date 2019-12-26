@@ -12,12 +12,14 @@ window.onload = function() {
           localStorage.removeItem('token');
           console.log('Logged out');
         });
+        window.location.reload();
       });
     } else {
       logButton.innerHTML = "Sign in";
       logButton.addEventListener('click', function() {
         chrome.identity.getAuthToken({interactive: true}, function(token) {
           localStorage.setItem('token', token);
+          window.location.reload();
         });
       });
     }
