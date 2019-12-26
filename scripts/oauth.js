@@ -13,7 +13,7 @@ window.onload = function() {
         chrome.identity.removeCachedAuthToken({ token: localStorage.getItem('token') }, function() {
           localStorage.removeItem('token');
           console.log('Logged out');
-          window.location.reload();
+          setTimeout(() => window.location.reload(), 2000);
         });
       });
     } else {

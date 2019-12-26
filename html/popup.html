@@ -2,14 +2,17 @@
 <html>
   <head>
     <script type="text/javascript" src="../scripts/oauth.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Merriweather:300,300i,400,400i,700,700i,900,900i&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/popup.css">
     <link rel="stylesheet" href="../css/bootlegstrap.css">
   </head>
     
-  <body>
-    <div class="d-flex flex-column justify-content-center align-items-center">
-      <p id="auth-title" class="text-24 text-bold text-white">Looks like you are offline...</p>
-      <input id="log" type="button" value="">
+  <body class="merriweather">
+    <div class="d-flex flex-column align-content-center align-items-center fill">
+      <div class="section">
+        <span id="auth-title" class="text-24 text-white">Looks like you are offline...</span>
+      </div>
+      <input id="log" type="button" class="merriweather text-28 text-black text-white text-shadow" value="">
     </div>
   </body>
 </html>

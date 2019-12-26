@@ -7,7 +7,7 @@
     flex-direction: column;
 }
 
-.justify-content-center {
+.align-content-center {
     justify-content: center;
 }
 
@@ -19,6 +19,10 @@
     display: none;
 }
 
+.text-28 {
+    font-size: 28px;
+}
+
 .text-24 {
     font-size: 24px;
 }
@@ -27,6 +31,14 @@
     font-weight: bold;
 }
 
+.text-black {
+    font-weight: bolder;
+}
+
 .text-white {
     color: white;
+}
+
+.text-shadow {
+    text-shadow: 0px 0px 4px #000;
 }
