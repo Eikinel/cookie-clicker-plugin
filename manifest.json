@@ -1,0 +1,27 @@
+{
+    "name": "Cookie Clicker Share",
+    "version": "0.1",
+    "description": "Import/Export Cookie Clicker saves between devices",
+    "permissions": ["activeTab", "declarativeContent", "storage"],
+    "background": {
+      "scripts": ["scripts/background.js"],
+      "persistent": false
+    },
+    "page_action": {
+      "default_popup": "html/popup.html",
+      "default_icon": {
+        "16": "images/cookie-16.png",
+        "32": "images/cookie-32.png",
+        "48": "images/cookie-48.png",
+        "128": "images/cookie-128.png"
+      }
+    },
+    "options_page": "html/options.html",
+    "icons": {
+      "16": "images/cookie-16.png",
+      "32": "images/cookie-32.png",
+      "48": "images/cookie-48.png",
+      "128": "images/cookie-128.png"
+    },
+    "manifest_version": 2
+  }
