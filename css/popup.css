@@ -1,8 +1,17 @@
 body {
-    width: 500px;
-    height: 300px;
+    min-width: 500px;
+    min-height: 200px;
+
+    background: #000 url('../images/popup/dark_noise.jpg');
+    background-image: url('../images/popup/shaded_borders.png'), url('../images/popup/dark_noise.jpg');
+    background-size: 100% 100%, auto;
+    background-color: #000;
+
+    font-family: Tahoma,Arial,sans-serif;
 }
 
-.hide {
-    display: none;
+input {
+    border-style: none;
+    background-color: #cccccc;
+    padding: 10px 10px 10px 10px;
 }
