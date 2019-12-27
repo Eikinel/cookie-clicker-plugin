@@ -1,20 +1,22 @@
 window.onload = async function() {
     const logoutButton = document.querySelector("#logout");
     const createSaveButton = document.querySelector("#add-save");
-    const pStorage = new Promise((resolve, reject) => {
+    const pStorage = new Promise((resolve) => {
         chrome.storage.local.get(["token", "userInfo"], (items) => resolve(items));
     });
-    const storage = await pStorage;
+    var storage = await pStorage;
 
     // Get user info
     if (!storage.userInfo) {
-        await window
-            .fetch(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${storage.token}`)
-            .then((response) => response.json())
-            .then((data) => chrome.storage.local.set({ "userInfo": data }));
+        fetch(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${storage.token}`)
+        .then((response) => response.json())
+        .then((userInfo) => chrome.storage.local.set({ "userInfo": userInfo }, () => {
+            storage.userInfo = userInfo;
+            this.setInfos(storage);
+        }));
+    } else {
+        this.setInfos(storage);
     }
-    document.querySelector("#name").innerHTML = storage.userInfo.given_name;
-    document.querySelector("#avatar").src = storage.userInfo.picture;
 
     // Buttons listeners
     logoutButton.addEventListener('click', () => {
@@ -22,18 +24,13 @@ window.onload = async function() {
             .fetch(`https://accounts.google.com/o/oauth2/revoke?token=${storage.token}`)
             .then((response) => {
                 chrome.identity.removeCachedAuthToken({token: storage.token});
-                    
-                console.log('Logged out');
-                chrome.storage.local = {};
-                chrome.browserAction.setPopup({popup: "html/login.html"});
-                window.location.href = "login.html";
-
-                return response;
-            });
+                this.logout();
+            })
+            .catch((err) => this.logout());
     });
 
     createSaveButton.addEventListener('click', () => {
-        new Promise((resolve, reject) => chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tab) => {
+        new Promise((resolve) => chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tab) => {
             resolve(tab);
         }))
         .then((tab) => {
@@ -50,4 +47,17 @@ window.onload = async function() {
             }
         })        
     });
+}
+
+function logout() {
+    chrome.storage.local.clear(() => {
+        console.log('Logged out');
+        chrome.browserAction.setPopup({popup: "html/login.html"});
+        window.location.href = "login.html";
+    });
+}
+
+function setInfos(storage) {
+    document.querySelector("#name").innerHTML = storage.userInfo.given_name;
+    document.querySelector("#avatar").src = storage.userInfo.picture;
 }
