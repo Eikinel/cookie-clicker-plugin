@@ -44,8 +44,6 @@ input {
     background-image: url('../images/popup/store_tiles.jpg');
     background-repeat: no-repeat;
     background-size: cover;
-    min-width: 50vw;
-    min-height: 30vh;
 }
 
 .fill {
