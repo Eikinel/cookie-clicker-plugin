@@ -2,17 +2,18 @@
     "name": "Cookie Clicker Share",
     "version": "0.1",
     "description": "Import/Export Cookie Clicker saves between devices",
-    "permissions": ["activeTab", "declarativeContent", "storage", "identity"],
+    "permissions": ["activeTab", "tabs", "declarativeContent", "identity"],
     "oauth2": {
-      "client_id": "457978225628-17m0dautimr8bh3cc3ba37uio6km8epq.apps.googleusercontent.com",
+      "client_id": "457978225628-se8vs3031uv5eqavd9o8q9tlqnq6fgvs.apps.googleusercontent.com",
       "scopes":["https://www.googleapis.com/auth/drive"]
     },
     "background": {
       "scripts": ["scripts/background.js"],
       "persistent": false
     },
-    "page_action": {
-      "default_popup": "html/popup.html",
+    "browser_action": {
+      "default_title": "Cookie Clicker Share",
+      "default_popup": "html/login.html",
       "default_icon": {
         "16": "images/cookie-16.png",
         "32": "images/cookie-32.png",

@@ -1,0 +1,61 @@
+body {
+    min-width: 500px;
+    min-height: 200px;
+    margin: 0;
+    padding: 0;
+
+    background: #000 url('../images/popup/dark_noise.jpg');
+    background-image: url('../images/popup/shaded_borders.png'), url('../images/popup/dark_noise.jpg');
+    background-size: 100% 100%, auto;
+    background-color: #000;
+    
+    box-sizing: border-box; 
+    border-image-source: url('../images/popup/borders.png');
+    border-image-slice: 20;
+    border-image-width: 6;
+    border-style: solid;
+    border-image-repeat: repeat;
+}
+
+.section::before {
+    content: '';
+    display: block;
+    background: linear-gradient(to right,rgba(255,255,255,0),rgba(255,255,255,0),rgba(255,255,255,0.25),rgba(255,255,255,0),rgba(255,255,255,0));
+    height: 1px;
+    margin: 6px 0px;
+}
+
+.section {
+    text-align: center;
+    padding: 0px 16px;
+    background: linear-gradient(to right,rgba(0,0,0,0),rgba(0,0,0,0),rgba(0,0,0,0.5),rgba(0,0,0,0),rgba(0,0,0,0));
+    margin: 12px 0px;
+}
+
+.section::after {
+    content: '';
+    display: block;
+    background: linear-gradient(to right,rgba(255,255,255,0),rgba(255,255,255,0),rgba(255,255,255,0.25),rgba(255,255,255,0),rgba(255,255,255,0));
+    height: 1px;
+    margin: 6px 0px;
+}
+
+input {
+    background-image: url('../images/popup/store_tiles.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    min-width: 50vw;
+    min-height: 30vh;
+}
+
+.fill {
+    top: 10px;
+    left: 10px;
+    position: relative;
+    width: calc(100% - 20px);
+    height: 100%;
+}
+
+.merriweather {
+    font-family: "Merriweather", Georgia, serif;
+}
