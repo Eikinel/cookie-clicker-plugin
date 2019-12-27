@@ -34,16 +34,13 @@ window.onload = async function() {
 
     createSaveButton.addEventListener('click', () => {
         new Promise((resolve, reject) => chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tab) => {
-            console.log(tab);
             resolve(tab);
         }))
         .then((tab) => {
             return new Promise((resolve, reject) => {
-                if (tab && tab[0]) {
-                    chrome.tabs.executeScript(tab[0].id, { code: "localStorage['CookieClickerGame']" }, (gameHash) => resolve(gameHash));
-                } else {
+                (tab && tab[0]) ?
+                    chrome.tabs.executeScript(tab[0].id, { code: "localStorage['CookieClickerGame']" }, (gameHash) => resolve(gameHash)) :
                     reject("No opened tab matching Cookie Clicker URL");
-                }
             });
         })
         .then((gameHash) => {
