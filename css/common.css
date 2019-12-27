@@ -46,6 +46,10 @@ input {
     background-size: cover;
 }
 
+input[type="button"] {
+    cursor: pointer;
+}
+
 .fill {
     top: 10px;
     left: 10px;

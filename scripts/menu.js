@@ -25,14 +25,10 @@ window.onload = async function() {
         await window
             .fetch(`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${storage.token}`)
             .then((response) => response.json())
-            .then((data) => {
-                this.console.log("Stock user data");
-                chrome.storage.local.set({ "userInfo": data }, () => {
-                    chrome.storage.local.get(["token", "userInfo"], (r) => this.console.log(r));
-                });
-                document.querySelector("#name").innerHTML = data.given_name;
-            })
-    } else {
-        document.querySelector("#name").innerHTML = storage.userInfo.given_name;
+            .then((data) => chrome.storage.local.set({ "userInfo": data }));
     }
+
+    this.console.log(storage.userInfo);
+    document.querySelector("#name").innerHTML = storage.userInfo.given_name;
+    document.querySelector("#avatar").src = storage.userInfo.picture;
 }
