@@ -9,11 +9,21 @@
   </head>
     
   <body class="merriweather">
-    <div class="d-flex flex-column align-content-center align-items-center fill">
+    <div class="d-flex flex-column fill">
       <img id="avatar">
 
-      <div class="section">
-        <span id="auth-title" class="text-24 text-white">Welcome, <span id="name" class="text-italic">Unknown</span>.</span>
+      <div class="d-flex align-content-center align-items-center w-100">
+        <div class="section">
+          <span id="auth-title" class="text-24 text-white">Welcome, <span id="name" class="text-italic">Unknown</span>.</span>
+        </div>
+      </div>
+
+      <div class="subsection d-flex flex-column align-content-start">
+        <span class="title text-18 text-white">Saves</span>
+        <div class="d-flex listing">
+          <a id="add-save" class="option">Create new save</a>
+          <a id="import-save" class="option">Import save</a>
+        </div>
       </div>
     </div>
 

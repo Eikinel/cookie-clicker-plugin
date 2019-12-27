@@ -7,6 +7,14 @@
     flex-direction: column;
 }
 
+.align-content-start {
+    align-content: flex-start;
+}
+
+.align-items-start {
+    align-items: flex-start;
+}
+
 .align-content-center {
     justify-content: center;
 }
@@ -19,12 +27,16 @@
     display: none;
 }
 
-.text-28 {
-    font-size: 28px;
+.text-18 {
+    font-size: 18px;
 }
 
 .text-24 {
     font-size: 24px;
+}
+
+.text-28 {
+    font-size: 28px;
 }
 
 .text-bold {
@@ -39,10 +51,26 @@
     color: white;
 }
 
+.text-grey {
+    color: #999999;
+}
+
 .text-shadow {
     text-shadow: 0px 0px 4px #000;
 }
 
 .text-italic {
     font-style: italic;
+}
+
+.text-left {
+    float: left;
+}
+
+.text-right {
+    float: right;
+}
+
+.w-100 {
+    width: 100%;
 }
