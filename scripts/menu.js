@@ -1,29 +1,46 @@
+// Check authentication
 window.onload = async function() {
+    await getAuthToken();
+
     const logoutButton = document.querySelector("#logout");
     const createSaveButton = document.querySelector("#new-save");
-    const pStorage = new Promise((resolve) => {
-        chrome.storage.local.get(["token", "userInfo"], (items) => resolve(items));
+    const storage = await new Promise((resolve) => {
+        chrome.storage.local.get(["userInfo"], (storage) => resolve(storage));
     });
-    var storage = await pStorage;
 
+    // Set user's data from storage
     document.querySelector("#name").innerHTML = storage.userInfo.given_name;
     document.querySelector("#avatar").src = storage.userInfo.picture;
 
+    // List user's saves from Drive
+    fetch("https://www.googleapis.com/drive/v3/files?" +
+        "key=AIzaSyCZvxontknsN3w_Zqx38TNsH0ulWVpcpQQ&" +
+        "q=mimeType = 'application/vnd.google-apps.folder'"
+    )
+    .then((res) => {
+        switch (res.status) {
+            case 200:
+                console.log(res);
+                break;
+            case 401:
+                break;
+        }
+    })
+
     // Buttons listeners
     logoutButton.addEventListener('click', () => {
-        window
-            .fetch(`https://accounts.google.com/o/oauth2/revoke?token=${storage.token}`)
+        getAuthToken().then((token) => {
+            fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`)
             .then((response) => {
-                chrome.identity.removeCachedAuthToken({token: storage.token});
-                this.logout();
+                this.logout(token);
             })
-            .catch((err) => this.logout());
+        });
     });
 
     createSaveButton.addEventListener('click', () => {
-        new Promise((resolve) => chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tab) => {
-            resolve(tab);
-        }))
+        new Promise((resolve) => {
+            chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tab) => resolve(tab))
+        })
         .then((tab) => {
             return new Promise((resolve, reject) => {
                 (tab && tab[0]) ?
@@ -37,13 +54,5 @@ window.onload = async function() {
                 // Save to user's drive
             }
         })        
-    });
-}
-
-function logout() {
-    chrome.storage.local.clear(() => {
-        console.log('Logged out');
-        chrome.browserAction.setPopup({popup: "html/login.html"});
-        window.location.href = "login.html";
     });
 }
