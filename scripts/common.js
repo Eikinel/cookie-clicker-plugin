@@ -1,23 +1,23 @@
 // Abstract getAuthToken
 function getAuthToken() {
     return new Promise((resolve, reject) => chrome.identity.getAuthToken({interactive: false}, (preAuthToken) => {
-        if (!preAuthToken) {
-            reject("Token wrong or expired");
-            logout(preAuthToken);
+        if (preAuthToken) {
+            resolve(preAuthToken);
+            return;
         }
-    
-        resolve(preAuthToken);
+
+        chrome.browserAction.getPopup({}, (popup) => !popup.match(/\/(login\.html)/g) ? logout() : 0);
+        reject("Token wrong or expired");
     }));
 }
 
 function logout(token) {
     if (token) {
+        fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`)
         chrome.identity.removeCachedAuthToken({token: token});
-        chrome.storage.local.clear(() => {
-            console.log('Logged out');
-            switchFrame("login");
-        });
     }
+
+    chrome.storage.local.clear(() => switchFrame("login"));
 }
 
 function switchFrame(frame) {
