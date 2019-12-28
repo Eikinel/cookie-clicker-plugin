@@ -13,21 +13,8 @@ window.onload = async function() {
         document.querySelector("#avatar").src = storage.userInfo.picture;
     }
 
-    //AIzaSyCZvxontknsN3w_Zqx38TNsH0ulWVpcpQQ
-    //q=mimeType = 'application/vnd.google-apps.folder'
     // List user's saves from Drive
-    getAuthToken().then((token) => {
-        fetch(`https://www.googleapis.com/drive/v3/files?key=AIzaSyCZvxontknsN3w_Zqx38TNsH0ulWVpcpQQ`)
-        .then((res) => {
-            switch (res.status) {
-                case 200:
-                    console.log(res);
-                    break;
-                case 401:
-                    break;
-            }
-        })
-    });
+    this.listSaves();
 
     // Buttons listeners
     logoutButton.addEventListener('click', () => {
@@ -52,4 +39,32 @@ window.onload = async function() {
             }
         })        
     });
+}
+
+async function listSaves() {
+    getAuthToken()
+    .then((token) => {
+        fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}` +
+              `&q=mimeType='application/vnd.google-apps.folder' and name='${SAVE_FOLDER}'`, {
+            headers: getHeaders(token)
+        })
+        .then((res) => res.json())
+        .then((folder) => {
+            console.log(folder);
+            // Create new folder if it doesn't exist
+            if (folder.files.length < 1) {
+                return fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: getHeaders(token),
+                    body: JSON.stringify({
+                        mimeType: 'application/vnd.google-apps.folder',
+                        name: SAVE_FOLDER
+                    })
+                })
+            }
+    
+            return new Promise((res) => res(folder));
+        })
+        .then((folder) => console.log(folder));
+    })
 }

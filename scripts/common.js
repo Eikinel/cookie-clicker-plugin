@@ -1,4 +1,5 @@
-// Abstract getAuthToken
+const SAVE_FOLDER = "Cookie Clicker Share"
+
 function getAuthToken() {
     return new Promise((resolve, reject) => chrome.identity.getAuthToken({interactive: false}, (preAuthToken) => {
         if (preAuthToken) {
@@ -22,4 +23,11 @@ function logout(token) {
 
 function switchFrame(frame) {
     chrome.browserAction.setPopup({popup: `html/${frame}.html`}, () => window.location.href = `${frame}.html`);
+}
+
+function getHeaders(token) {
+    return {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+    };
 }
