@@ -74,11 +74,15 @@ body {
 
 .listing {
     padding: 3px 16px;
+    box-sizing: border-box;
 }
 
-.listing b {
+.listing span {
     font-weight: bold;
-    opacity: 0.6;
+    font-size: 16px;
+    color: white;
+    padding-right: 10px;
+    word-break: break-word;
 }
 
 a, a:visited {
@@ -118,6 +122,16 @@ a.option {
     line-height: 100%;
 }
 
+a.option.warning:hover {
+    border-color: #f33;
+    color: #f33;
+}
+
+.warning, a.option.warning {
+    color: #c00;
+    border-color: #c00;
+}
+
 input {
     background-image: url('../images/popup/store_tiles.jpg');
     background-repeat: no-repeat;
@@ -129,8 +143,7 @@ input[type="button"] {
 }
 
 .fill {
-    top: 10px;
-    left: 10px;
+    margin: 10px;
     position: relative;
     width: calc(100% - 20px);
     height: calc(100% - 20px);
