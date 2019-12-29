@@ -1,4 +1,5 @@
 const SAVE_FOLDER = "Cookie Clicker Share"
+const EXTENSION = ".cookie"
 
 function getAuthToken() {
     return new Promise((resolve, reject) => chrome.identity.getAuthToken({interactive: false}, (preAuthToken) => {

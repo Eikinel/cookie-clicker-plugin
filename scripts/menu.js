@@ -1,8 +1,5 @@
 // Check authentication
 window.onload = async function() {
-    const logoutButton = document.querySelector("#logout");
-    const createSaveButton = document.querySelector("#import-save");
-    const refreshListButton = document.querySelector("#refresh-list");
     const pStorage = new Promise((resolve) => {
         chrome.storage.local.get(["userInfo"], (storage) => resolve(storage));
     });
@@ -15,13 +12,24 @@ window.onload = async function() {
     }
 
     // Buttons listeners
-    logoutButton.addEventListener('click', () => {
+    document.querySelector("#logout").addEventListener('click', () => {
         getAuthToken().then((token) => logout(token));
     });
 
-    refreshListButton.addEventListener('click', listSaves());
+    document.querySelector("#refresh-list").addEventListener('click', () => listSaves());
+    document.querySelector("#new-save").addEventListener('click', () => {
+        createSave().then(() => listSaves());
+    });
 
-    createSaveButton.addEventListener('click', () => {
+    // List user's saves from Drive
+    listSaves();
+}
+
+
+// CRUD
+async function createSave() {
+    return crudRequestWrapper()
+    .then((wrapper) => {
         new Promise((resolve) => {
             chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tab) => resolve(tab))
         })
@@ -33,21 +41,23 @@ window.onload = async function() {
             });
         })
         .then((gameHash) => {
-            console.log(gameHash);
-            gameHash ? createSave() : 0;
-        })        
-    });
+            const date = new Date();
+            const file = new Blob([`${gameHash}`], {type: 'text/plain'});
 
-    // List user's saves from Drive
-    listSaves();
-}
-
-
-// CRUD
-async function createSave() {
-    crudRequestWrapper()
-    .then((wrapper) => {
-        console.log(wrapper);
+            return fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}&uploadType=multipart`, {
+                method: 'POST',
+                headers: getHeaders(wrapper.token),
+                body: JSON.stringify({
+                    file: file,
+                    mimeType: 'text/plain',
+                    createdTime: date,
+                    name: `${date.toDateString()}${EXTENSION}`,
+                    parents: [`${wrapper.folderId}`]
+                })
+            })
+        })
+        .then((res) => res.json())
+        .then((jsonData) => console.log(jsonData));
     });
 }
 
@@ -60,47 +70,45 @@ async function listSaves() {
         })
         .then((res) => res.json())
         .then((filesJson) => {
+            filesJson.files = filesJson.files.filter((file) => !file.trashed);
             const listDiv = document.querySelector("#save-list");
 
-            // Clear div
             listDiv.innerHTML = "";
 
             // Populate div
             for (const file of filesJson.files) {
-                listDiv.innerHTML +=
-                `<div class="d-flex listing justify-content-flex-end flex-wrap w-100">
-                    <span class="flex-grow-1">${file.name}</span>
-                    <div class="d-flex listing">
-                        <a id="save-${file.id}" class="option">Save</a>
-                        <a id="use-${file.id}" class="option">Use</a>
-                        <a id="delete-${file.id}" class="option warning">Delete</a>
-                    </div>
-                </div>`
+                const match = file.name.match(/^([^\.]+)(\.cookie)$/gm);
 
-                document.querySelector(`#save-${file.id}`).addEventListener('click', () => {
-                    console.log(`Saving to ${file.id}`);
-                });
+                if (match) {
+                    listDiv.innerHTML +=
+                    `<div class="d-flex listing justify-content-flex-end flex-wrap w-100">
+                        <span class="flex-grow-1">${match[0]}</span>
+                        <div class="d-flex listing">
+                            <a id="save-${file.id}" class="option">Save</a>
+                            <a id="use-${file.id}" class="option">Use</a>
+                            <a id="delete-${file.id}" class="option warning">Delete</a>
+                        </div>
+                    </div>`
 
-                document.querySelector(`#use-${file.id}`).addEventListener('click', () => {
-                    console.log(`Using ${file.id}`);
-                });
-
-                document.querySelector(`#delete-${file.id}`).addEventListener('click', () => {
-                    console.log(`Deleting ${file.id}`);
-                });
+                    document.querySelector(`#save-${file.id}`).addEventListener('click', () => updateSave(file.id));
+                    document.querySelector(`#use-${file.id}`).addEventListener('click', () => {
+                        console.log(`Using ${file.id}`);
+                    });
+                    document.querySelector(`#delete-${file.id}`).addEventListener('click', () => deleteSave(file.id));
+                }
             }
         });
     });
 }
 
-async function updateSave() {
+async function updateSave(fileId) {
     crudRequestWrapper()
     .then((wrapper) => {
-        console.log(wrapper);
-    });    
+        
+    });
 }
 
-async function deleteSave() {
+async function deleteSave(fileId) {
     crudRequestWrapper()
     .then((wrapper) => {
         console.log(wrapper);
