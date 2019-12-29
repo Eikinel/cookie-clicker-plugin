@@ -18,7 +18,7 @@ window.onload = async function() {
 
     document.querySelector("#refresh-list").addEventListener('click', () => listSaves());
     document.querySelector("#new-save").addEventListener('click', () => {
-        createSave().then(() => listSaves());
+        createSave().then((res) => listSaves());
     });
 
     // List user's saves from Drive
@@ -28,49 +28,49 @@ window.onload = async function() {
 
 // CRUD
 async function createSave() {
-    return crudRequestWrapper()
-    .then((wrapper) => {
-        new Promise((resolve) => {
-            chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tab) => resolve(tab))
-        })
-        .then((tab) => {
-            return new Promise((resolve, reject) => {
-                (tab && tab[0]) ?
-                    chrome.tabs.executeScript(tab[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve(gameHash[0])) :
-                    reject("No opened tab matching Cookie Clicker URL");
-            });
-        })
-        .then((gameHash) => {
-            const date = new Date();
-            const file = new Blob([`${gameHash}`], {type: 'text/plain'});
+    const wrapper = await crudRequestWrapper()
 
-            return fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}&uploadType=multipart`, {
-                method: 'POST',
-                headers: getHeaders(wrapper.token),
-                body: JSON.stringify({
-                    file: file,
-                    mimeType: 'text/plain',
-                    createdTime: date,
-                    name: `${date.toDateString()}${EXTENSION}`,
-                    parents: [`${wrapper.folderId}`]
-                })
-            })
+    return new Promise((resolve) => {
+        chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tab) => resolve(tab))
+    })
+    .then((tab) => {
+        return new Promise((resolve, reject) => {
+            (tab && tab[0]) ?
+                chrome.tabs.executeScript(tab[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve(gameHash[0])) :
+                reject("No opened tab matching Cookie Clicker URL");
+        });
+    })
+    .then((gameHash) => {
+        const form = new FormData();
+        const file = new Blob([gameHash], { type: 'text/plain' });
+        const metadata = {
+            mimeType: 'text/plain',
+            createdTime: new Date(),
+            name: `Test${EXTENSION}`,
+            parents: [wrapper.folderId]                    
+        };
+
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json;charset=UTF-8' }));
+        form.append('file', file);
+
+        return fetch(`https://www.googleapis.com/upload/drive/v3/files?key=${API_KEY}&uploadType=multipart`, {
+            method: 'POST',
+            headers: new Headers({ 'Authorization': `Bearer ${wrapper.token}` }),
+            body: form
         })
-        .then((res) => res.json())
-        .then((jsonData) => console.log(jsonData));
-    });
+    })
+    .then((res) => res.json());
 }
 
 async function listSaves() {
     crudRequestWrapper()
     .then((wrapper) => {
         fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}` +
-        `&pageSize=5&q='${wrapper.folderId}' in parents and mimeType!='application/vnd.google-apps.folder'`, {
+        `&pageSize=5&q='${wrapper.folderId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false`, {
             headers: getHeaders(wrapper.token)
         })
         .then((res) => res.json())
         .then((filesJson) => {
-            filesJson.files = filesJson.files.filter((file) => !file.trashed);
             const listDiv = document.querySelector("#save-list");
 
             listDiv.innerHTML = "";

@@ -26,9 +26,9 @@ function switchFrame(frame) {
     chrome.browserAction.setPopup({popup: `html/${frame}.html`}, () => window.location.href = `${frame}.html`);
 }
 
-function getHeaders(token) {
-    return {
+function getHeaders(token, contentType = "application/json") {
+    return new Headers({
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-    };
+        'Content-Type': contentType
+    });
 }
