@@ -122,14 +122,19 @@ a.option {
     line-height: 100%;
 }
 
+a.option.warning {
+    color: #c00;
+    border-color: #c00;
+}
+
 a.option.warning:hover {
     border-color: #f33;
     color: #f33;
 }
 
-.warning, a.option.warning {
-    color: #c00;
-    border-color: #c00;
+a.option.warning:active {
+    border-color: #e11;
+    color: #e11;
 }
 
 input {

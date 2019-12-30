@@ -28,15 +28,15 @@ window.onload = async function() {
 
 // CRUD
 async function createSave() {
-    const wrapper = await crudRequestWrapper()
+    const wrapper = await crudRequestWrapper();
 
     return new Promise((resolve) => {
-        chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tab) => resolve(tab))
+        chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tabs) => resolve(tabs))
     })
-    .then((tab) => {
+    .then((tabs) => {
         return new Promise((resolve, reject) => {
-            (tab && tab[0]) ?
-                chrome.tabs.executeScript(tab[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve(gameHash[0])) :
+            (tabs && tabs[0]) ?
+                chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve(gameHash[0])) :
                 reject("No opened tab matching Cookie Clicker URL");
         });
     })
@@ -90,11 +90,9 @@ async function listSaves() {
                         </div>
                     </div>`
 
-                    document.querySelector(`#save-${file.id}`).addEventListener('click', () => updateSave(file.id));
-                    document.querySelector(`#use-${file.id}`).addEventListener('click', () => {
-                        console.log(`Using ${file.id}`);
-                    });
-                    document.querySelector(`#delete-${file.id}`).addEventListener('click', () => deleteSave(file.id));
+                    document.querySelector(`#save-${file.id}`).addEventListener('click', () => updateSave(file.id).then(() => listSaves()));
+                    document.querySelector(`#use-${file.id}`).addEventListener('click', () => useSave(file.id));
+                    document.querySelector(`#delete-${file.id}`).addEventListener('click', () => deleteSave(file.id).then(() => listSaves()));
                 }
             }
         });
@@ -102,17 +100,38 @@ async function listSaves() {
 }
 
 async function updateSave(fileId) {
-    crudRequestWrapper()
-    .then((wrapper) => {
-        
-    });
+    const wrapper = await crudRequestWrapper();
 }
 
 async function deleteSave(fileId) {
-    crudRequestWrapper()
-    .then((wrapper) => {
-        console.log(wrapper);
-    });    
+    const wrapper = await crudRequestWrapper();
+
+    return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+        method: 'DELETE',
+        headers: getHeaders(wrapper.token)
+    });
+}
+
+async function useSave(fileId) {
+    const wrapper = await crudRequestWrapper();
+
+    const pGameHash = fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        headers: getHeaders(wrapper.token)
+    })
+    .then((res) => res.text());
+
+    const pTabs = new Promise((resolve) => {
+        chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tabs) => resolve(tabs))
+    })
+
+    Promise.all([pGameHash, pTabs])
+    .then((values) => {
+        const [gameHash, tabs] = values;
+
+        console.log(values);
+        (tabs && tabs[0]) ?
+            chrome.tabs.sendMessage(tabs[0].id, { gameHash: gameHash }) : 0
+    });
 }
 
 

@@ -9,8 +9,8 @@
     "oauth2": {
       "client_id": "457978225628-17m0dautimr8bh3cc3ba37uio6km8epq.apps.googleusercontent.com",
       "scopes": [
-        "https://www.googleapis.com/auth/drive.appdata",
         "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive.appdata",
         "https://www.googleapis.com/auth/drive.metadata",
         "https://www.googleapis.com/auth/userinfo.profile"
       ]
@@ -19,6 +19,12 @@
       "scripts": ["scripts/background.js"],
       "persistent": false
     },
+    "content_scripts": [
+      {
+        "matches": ["http://orteil.dashnet.org/cookieclicker/", "https://orteil.dashnet.org/cookieclicker/"],
+        "js": ["scripts/load_save.js"]
+      }
+    ],
     "browser_action": {
       "default_title": "Cookie Clicker Share",
       "default_popup": "html/login.html",
