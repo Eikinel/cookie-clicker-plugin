@@ -35,9 +35,14 @@ async function createSave() {
     })
     .then((tabs) => {
         return new Promise((resolve, reject) => {
-            (tabs && tabs[0]) ?
-                chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve(gameHash[0])) :
+            if (tabs && tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, { type: "SAVE" }, (res) => {
+                    console.log(res);
+                    chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve(gameHash[0]))
+                });
+            } else {
                 reject("No opened tab matching Cookie Clicker URL");
+            }
         });
     })
     .then((gameHash) => {
@@ -128,7 +133,10 @@ async function useSave(fileId) {
     .then(([gameHash, tabs]) => {
         console.log({gameHash, tabs});
         if (tabs && tabs[0]) {
-            chrome.tabs.sendMessage(tabs[0].id, { gameHash: gameHash });
+            chrome.tabs.sendMessage(tabs[0].id, {
+                type: "LOAD",
+                gameHash: gameHash
+            });
         }
     })
 }
