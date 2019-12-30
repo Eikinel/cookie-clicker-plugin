@@ -137,6 +137,12 @@ a.option.warning:active {
     color: #e11;
 }
 
+a.option.disabled {
+    color: #666;
+    border-color: #666;
+    cursor: default;
+}
+
 input {
     background-image: url('../images/popup/store_tiles.jpg');
     background-repeat: no-repeat;

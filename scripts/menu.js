@@ -84,11 +84,11 @@ async function listSaves() {
                     `<div class="d-flex listing justify-content-flex-end flex-wrap w-100">
                         <span class="flex-grow-1">${match[0]}</span>
                         <div class="d-flex listing">
-                            <a id="save-${file.id}" class="option">Save</a>
+                            <a id="save-${file.id}" class="option disabled">Save</a>
                             <a id="use-${file.id}" class="option">Use</a>
                             <a id="delete-${file.id}" class="option warning">Delete</a>
                         </div>
-                    </div>`
+                    </div>`;
 
                     document.querySelector(`#save-${file.id}`).addEventListener('click', () => updateSave(file.id).then(() => listSaves()));
                     document.querySelector(`#use-${file.id}`).addEventListener('click', () => useSave(file.id));
@@ -125,13 +125,12 @@ async function useSave(fileId) {
     })
 
     Promise.all([pGameHash, pTabs])
-    .then((values) => {
-        const [gameHash, tabs] = values;
-
-        console.log(values);
-        (tabs && tabs[0]) ?
-            chrome.tabs.sendMessage(tabs[0].id, { gameHash: gameHash }) : 0
-    });
+    .then(([gameHash, tabs]) => {
+        console.log({gameHash, tabs});
+        if (tabs && tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, { gameHash: gameHash });
+        }
+    })
 }
 
 
@@ -149,8 +148,8 @@ async function crudRequestWrapper() {
 }
 
 async function getSaveFolderId(token) {
-    return fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}` +
-    `&q=mimeType='application/vnd.google-apps.folder' and name='${SAVE_FOLDER}'`, {
+    return fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}
+    &q=mimeType='application/vnd.google-apps.folder' and name='${SAVE_FOLDER}'`, {
         headers: getHeaders(token)
     })
     .then((res) => res.json())
