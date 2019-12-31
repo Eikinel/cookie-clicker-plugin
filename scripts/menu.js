@@ -15,7 +15,6 @@ window.onload = async function() {
     document.querySelector("#logout").addEventListener('click', () => {
         getAuthToken().then((token) => logout(token));
     });
-
     document.querySelector("#refresh-list").addEventListener('click', () => listSaves());
     document.querySelector("#new-save").addEventListener('click', () => {
         createSave().then((res) => listSaves());
@@ -37,8 +36,7 @@ async function createSave() {
         return new Promise((resolve, reject) => {
             if (tabs && tabs[0]) {
                 chrome.tabs.sendMessage(tabs[0].id, { type: "SAVE" }, (res) => {
-                    console.log(res);
-                    chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve(gameHash[0]))
+                    chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve(gameHash[0]))        
                 });
             } else {
                 reject("No opened tab matching Cookie Clicker URL");
@@ -81,13 +79,13 @@ async function listSaves() {
             listDiv.innerHTML = "";
 
             // Populate div
-            for (const file of filesJson.files) {
+            filesJson.files.forEach(file => {
                 const match = file.name.match(/^([^\.]+)(\.cookie)$/gm);
 
                 if (match) {
                     listDiv.innerHTML +=
                     `<div class="d-flex listing justify-content-flex-end flex-wrap w-100">
-                        <span class="flex-grow-1">${match[0]}</span>
+                        <span class="flex-grow-1">${match[0].substring(0, match[0].length - 7)}</span>
                         <div class="d-flex listing">
                             <a id="save-${file.id}" class="option disabled">Save</a>
                             <a id="use-${file.id}" class="option">Use</a>
@@ -99,7 +97,7 @@ async function listSaves() {
                     document.querySelector(`#use-${file.id}`).addEventListener('click', () => useSave(file.id));
                     document.querySelector(`#delete-${file.id}`).addEventListener('click', () => deleteSave(file.id).then(() => listSaves()));
                 }
-            }
+            });
         });
     });
 }

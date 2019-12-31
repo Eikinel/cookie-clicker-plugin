@@ -67,6 +67,10 @@
     color: #999999;
 }
 
+.text-red {
+    color: #bb0000;
+}
+
 .text-shadow {
     text-shadow: 0px 0px 4px #000;
 }

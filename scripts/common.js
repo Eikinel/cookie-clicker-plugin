@@ -1,25 +1,28 @@
-const SAVE_FOLDER = "Cookie Clicker Share"
-const EXTENSION = ".cookie"
+const SAVE_FOLDER = "Cookie Clicker Share";
+const EXTENSION = ".cookie";
+const AuthenticationException = {
+    CANCELED_LOGIN: 0,
+    INVALID_TOKEN: 1
+};
 
 function getAuthToken() {
     return new Promise((resolve, reject) => chrome.identity.getAuthToken({interactive: false}, (preAuthToken) => {
         if (preAuthToken) {
             resolve(preAuthToken);
-            return;
+        } else {
+            chrome.browserAction.getPopup({}, (popup) => { console.log(popup); !popup.match(/\/(login\.html)/g) ? logout() : 0});
+            reject(AuthenticationException.INVALID_TOKEN);
         }
-
-        chrome.browserAction.getPopup({}, (popup) => !popup.match(/\/(login\.html)/g) ? logout() : 0);
-        reject("Token wrong or expired");
     }));
 }
 
-function logout(token) {
+async function logout(token) {
     if (token) {
-        fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`)
-        chrome.identity.removeCachedAuthToken({token: token});
+        await fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`)
+        .then(() => chrome.identity.removeCachedAuthToken({token: token}));
     }
 
-    chrome.storage.local.clear(() => switchFrame("login"));
+    chrome.storage.local.clear(() => setTimeout(switchFrame("login"), 1000));
 }
 
 function switchFrame(frame) {
