@@ -86,7 +86,7 @@ async function listSaves() {
                     listDiv.innerHTML +=
                     `<div class="d-flex listing justify-content-flex-end flex-wrap w-100">
                         <span class="flex-grow-1">${match[0].substring(0, match[0].length - 7)}</span>
-                        <div class="d-flex listing">
+                        <div class="d-flex">
                             <a id="save-${file.id}" class="option disabled">Save</a>
                             <a id="use-${file.id}" class="option">Use</a>
                             <a id="delete-${file.id}" class="option warning">Delete</a>

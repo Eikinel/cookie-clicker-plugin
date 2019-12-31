@@ -10,7 +10,7 @@ function getAuthToken() {
         if (preAuthToken) {
             resolve(preAuthToken);
         } else {
-            chrome.browserAction.getPopup({}, (popup) => { console.log(popup); !popup.match(/\/(login\.html)/g) ? logout() : 0});
+            chrome.browserAction.getPopup({}, (popup) => !popup.match(/\/(login\.html)/g) ? logout() : 0);
             reject(AuthenticationException.INVALID_TOKEN);
         }
     }));

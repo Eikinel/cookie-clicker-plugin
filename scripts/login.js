@@ -17,11 +17,12 @@ window.onload = () => {
         throw AuthenticationException.CANCELED_LOGIN;
       }
     })
-    .catch(() => {
+    .catch((err) => {
       const field = document.querySelector("#info");
-          
-      field.className = "text-red text-18";
+
       field.innerHTML = "Canceled login, please retry.";
+
+      throw err;
     })
     .then(() => switchFrame("menu"));
   });
