@@ -1,5 +1,3 @@
-const SAVE_FOLDER = "Cookie Clicker Share";
-const EXTENSION = ".cookie";
 const AuthenticationException = {
     CANCELED_LOGIN: 0,
     INVALID_TOKEN: 1

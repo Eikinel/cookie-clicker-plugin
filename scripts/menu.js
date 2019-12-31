@@ -1,3 +1,6 @@
+const SAVE_FOLDER = "Cookie Clicker Share";
+const EXTENSION = ".cookie";
+
 // Check authentication
 window.onload = async function() {
     const pStorage = new Promise((resolve) => {
@@ -43,6 +46,7 @@ async function createSave() {
             }
         });
     })
+    .catch(())
     .then((gameHash) => {
         const form = new FormData();
         const file = new Blob([gameHash], { type: 'text/plain' });
@@ -79,19 +83,20 @@ async function listSaves() {
             listDiv.innerHTML = "";
 
             // Populate div
-            filesJson.files.forEach(file => {
+            filesJson.files.forEach((file) => {
                 const match = file.name.match(/^([^\.]+)(\.cookie)$/gm);
 
                 if (match) {
-                    listDiv.innerHTML +=
-                    `<div class="d-flex listing justify-content-flex-end flex-wrap w-100">
-                        <span class="flex-grow-1">${match[0].substring(0, match[0].length - 7)}</span>
-                        <div class="d-flex">
-                            <a id="save-${file.id}" class="option disabled">Save</a>
-                            <a id="use-${file.id}" class="option">Use</a>
-                            <a id="delete-${file.id}" class="option warning">Delete</a>
-                        </div>
-                    </div>`;
+                    listDiv.insertAdjacentHTML('beforeend', 
+                        `<div class="d-flex listing justify-content-flex-end flex-wrap w-100">
+                            <span class="flex-grow-1">${match[0].substring(0, match[0].length - 7)}</span>
+                            <div class="d-flex">
+                                <a id="save-${file.id}" class="option disabled">Save</a>
+                                <a id="use-${file.id}" class="option">Use</a>
+                                <a id="delete-${file.id}" class="option warning">Delete</a>
+                            </div>
+                        </div>`
+                    );
 
                     document.querySelector(`#save-${file.id}`).addEventListener('click', () => updateSave(file.id).then(() => listSaves()));
                     document.querySelector(`#use-${file.id}`).addEventListener('click', () => useSave(file.id));

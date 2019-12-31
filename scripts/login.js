@@ -20,6 +20,7 @@ window.onload = () => {
     .catch((err) => {
       const field = document.querySelector("#info");
 
+      field.classList.remove("hide");
       field.innerHTML = "Canceled login, please retry.";
 
       throw err;
