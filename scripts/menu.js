@@ -39,10 +39,10 @@ async function createSave() {
         return new Promise((resolve, reject) => {
             if (tabs && tabs[0]) {
                 chrome.tabs.sendMessage(tabs[0].id, { type: "SAVE" }, (res) => {
-                    chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve({
+                    setTimeout(() => chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve({
                         bakeryName: res.bakeryName,
                         gameHash: gameHash[0]
-                    }));
+                    })), 500);
                 });
             } else {
                 reject("No opened tab matching Cookie Clicker URL");
