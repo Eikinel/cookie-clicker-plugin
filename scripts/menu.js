@@ -39,21 +39,23 @@ async function createSave() {
         return new Promise((resolve, reject) => {
             if (tabs && tabs[0]) {
                 chrome.tabs.sendMessage(tabs[0].id, { type: "SAVE" }, (res) => {
-                    chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve(gameHash[0]))        
+                    chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve({
+                        bakeryName: res.bakeryName,
+                        gameHash: gameHash[0]
+                    }));
                 });
             } else {
                 reject("No opened tab matching Cookie Clicker URL");
             }
         });
     })
-    .catch(())
-    .then((gameHash) => {
+    .then((res) => {
         const form = new FormData();
-        const file = new Blob([gameHash], { type: 'text/plain' });
+        const file = new Blob([res.gameHash], { type: 'text/plain' });
         const metadata = {
             mimeType: 'text/plain',
             createdTime: new Date(),
-            name: `Test${EXTENSION}`,
+            name: `${res.bakeryName}${EXTENSION}`,
             parents: [wrapper.folderId]                    
         };
 

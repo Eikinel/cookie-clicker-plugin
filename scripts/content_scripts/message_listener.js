@@ -6,12 +6,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             document.querySelector("#textareaPrompt").innerHTML = request.gameHash;
             document.querySelector("#promptOption0").click();
         
-            sendResponse({ loaded: true });
             break;
         case "SAVE":
+            const bakeryName = document.querySelector("#bakeryName").innerHTML;
+
             window.dispatchEvent(new KeyboardEvent('keydown', { ctrlKey: true, keyCode: 83 }));
 
-            sendResponse({ saved: true });
+            sendResponse({ bakeryName: bakeryName });
             break;
         default:
             break;
