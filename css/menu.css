@@ -14,3 +14,30 @@
 #save-list {
     margin: 10px 0;
 }
+
+textarea {
+    font-family: "Merriweather", Georgia, serif;
+    font-weight: bold;
+    font-size: 16px;
+    color: white;
+
+    resize: none;
+    height: 16px;
+    overflow: hidden;
+
+    background-color: #222;
+    border: grey solid 1px;
+    padding-left: 5px;
+}
+
+textarea:focus {
+    outline: none;
+}
+
+div > .fa-pen {
+    display: none;
+}
+
+div:hover > .fa-pen {
+    display: inline-block;
+}

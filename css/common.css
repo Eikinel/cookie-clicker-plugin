@@ -16,6 +16,8 @@ body {
     border-image-width: 6;
     border-style: solid;
     border-image-repeat: repeat;
+
+    font-family: "Merriweather", Georgia, serif;
 }
 
 .section::before {
@@ -158,10 +160,6 @@ input[type="button"] {
     margin: 10px;
     position: relative;
     width: calc(100% - 20px);
-}
-
-.merriweather {
-    font-family: "Merriweather", Georgia, serif;
 }
 
 .hide {

@@ -55,7 +55,7 @@ async function createSave() {
         const metadata = {
             mimeType: 'text/plain',
             createdTime: new Date(),
-            name: `${res.bakeryName}${EXTENSION}`,
+            name: `${res.bakeryName + EXTENSION}`,
             parents: [wrapper.folderId]                    
         };
 
@@ -91,7 +91,10 @@ async function listSaves() {
                 if (match) {
                     listDiv.insertAdjacentHTML('beforeend', 
                         `<div class="d-flex listing justify-content-flex-end flex-wrap w-100">
-                            <span class="flex-grow-1">${match[0].substring(0, match[0].length - 7)}</span>
+                            <div id="editable-${file.id}" class="flex-grow-1">
+                                <span id="filename-${file.id}">${match[0].substring(0, match[0].length - 7)}</span>
+                                <i class="fas fa-pen text-white"></i>
+                            </div>
                             <div class="d-flex">
                                 <a id="save-${file.id}" class="option disabled">Save</a>
                                 <a id="use-${file.id}" class="option">Use</a>
@@ -100,7 +103,8 @@ async function listSaves() {
                         </div>`
                     );
 
-                    document.querySelector(`#save-${file.id}`).addEventListener('click', () => updateSave(file.id).then(() => listSaves()));
+                    document.querySelector(`#editable-${file.id}`).addEventListener('click', () => document.querySelector(`#filename-${file.id}`) ? startRenaming(file.id) : 0);
+                    document.querySelector(`#save-${file.id}`).addEventListener('click', () => {});//updateSave(file.id).then(() => listSaves()));
                     document.querySelector(`#use-${file.id}`).addEventListener('click', () => useSave(file.id));
                     document.querySelector(`#delete-${file.id}`).addEventListener('click', () => deleteSave(file.id).then(() => listSaves()));
                 }
@@ -109,24 +113,45 @@ async function listSaves() {
     });
 }
 
+
 async function updateSave(fileId) {
-    const wrapper = await crudRequestWrapper();
+}
+
+async function renameSave(fileId, previousFilename, filename) {
+    if (previousFilename !== filename && filename.length > 0) {
+        const wrapper = await crudRequestWrapper();
+        
+        return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+            method: 'PATCH',
+            headers: getHeaders(wrapper.token),
+            body: JSON.stringify({
+                name: `${filename + EXTENSION}`
+            })
+        })
+        .then(() => listSaves());
+    } else {
+        const span = document.createElement("span");
+
+        span.id = `filename-${fileId}`;
+        span.innerHTML = previousFilename;
+        document.querySelector(`textarea`).replaceWith(span);
+    }
 }
 
 async function deleteSave(fileId) {
-    const wrapper = await crudRequestWrapper();
+    const token = await getAuthToken();
 
     return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
         method: 'DELETE',
-        headers: getHeaders(wrapper.token)
+        headers: getHeaders(token)
     });
 }
 
 async function useSave(fileId) {
-    const wrapper = await crudRequestWrapper();
+    const token = await getAuthToken();
 
     const pGameHash = fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-        headers: getHeaders(wrapper.token)
+        headers: getHeaders(token)
     })
     .then((res) => res.text());
 
@@ -136,7 +161,6 @@ async function useSave(fileId) {
 
     Promise.all([pGameHash, pTabs])
     .then(([gameHash, tabs]) => {
-        console.log({gameHash, tabs});
         if (tabs && tabs[0]) {
             chrome.tabs.sendMessage(tabs[0].id, {
                 type: "LOAD",
@@ -182,4 +206,33 @@ async function getSaveFolderId(token) {
         return folder;
     })
     .then((folder) => folder.files[0].id);
+}
+
+
+function startRenaming(fileId) {
+    const field = document.querySelector(`#filename-${fileId}`);
+    const previousFilename = field.innerHTML;
+    const textarea = document.createElement("textarea");
+
+    textarea.value = previousFilename;
+
+    textarea.addEventListener('input', () => {
+        textarea.style.height = "0";
+        textarea.style.height = textarea.scrollHeight + 'px';
+    });
+    textarea.addEventListener('change', () => {
+        textarea.style.height = "0";
+        textarea.style.height = textarea.scrollHeight + 'px';
+    });
+    textarea.addEventListener('blur', () => renameSave(fileId, previousFilename, textarea.value));
+    textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === 'Escape') {
+            e.preventDefault();
+            document.querySelector(`textarea`).blur();
+        }
+    });
+
+    field.replaceWith(textarea);
+    textarea.style.height = textarea.scrollHeight + 'px';
+    textarea.focus();
 }
