@@ -91,7 +91,7 @@ async function listSaves() {
                 if (match) {
                     listDiv.insertAdjacentHTML('beforeend', 
                         `<div class="d-flex listing justify-content-flex-end flex-wrap w-100">
-                            <div id="editable-${file.id}" class="flex-grow-1">
+                            <div id="editable-${file.id}" class="d-flex align-items-center flex-grow-1">
                                 <span id="filename-${file.id}">${match[0].substring(0, match[0].length - 7)}</span>
                                 <i class="fas fa-pen text-white"></i>
                             </div>
