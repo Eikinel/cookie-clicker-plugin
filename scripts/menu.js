@@ -90,13 +90,13 @@ async function listSaves() {
 
                 if (match) {
                     listDiv.insertAdjacentHTML('beforeend', 
-                        `<div class="d-flex listing justify-content-flex-end flex-wrap w-100">
+                        `<div class="d-flex listing justify-content-flex-end align-items-center flex-wrap w-100">
                             <div id="editable-${file.id}" class="d-flex align-items-center flex-grow-1">
                                 <span id="filename-${file.id}">${match[0].substring(0, match[0].length - 7)}</span>
                                 <i class="fas fa-pen text-white"></i>
                             </div>
                             <div class="d-flex">
-                                <a id="save-${file.id}" class="option disabled">Save</a>
+                                <a id="save-${file.id}" class="option">Save</a>
                                 <a id="use-${file.id}" class="option">Use</a>
                                 <a id="delete-${file.id}" class="option warning">Delete</a>
                             </div>
@@ -104,7 +104,7 @@ async function listSaves() {
                     );
 
                     document.querySelector(`#editable-${file.id}`).addEventListener('click', () => document.querySelector(`#filename-${file.id}`) ? startRenaming(file.id) : 0);
-                    document.querySelector(`#save-${file.id}`).addEventListener('click', () => {});//updateSave(file.id).then(() => listSaves()));
+                    document.querySelector(`#save-${file.id}`).addEventListener('click', () => updateSave(file.id).then(() => listSaves()));
                     document.querySelector(`#use-${file.id}`).addEventListener('click', () => useSave(file.id));
                     document.querySelector(`#delete-${file.id}`).addEventListener('click', () => deleteSave(file.id).then(() => listSaves()));
                 }
@@ -115,6 +115,33 @@ async function listSaves() {
 
 
 async function updateSave(fileId) {
+    const token = await getAuthToken();
+
+    return new Promise((resolve) => {
+        chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tabs) => resolve(tabs))
+    })
+    .then((tabs) => {
+        return new Promise((resolve, reject) => {
+            if (tabs && tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, { type: "SAVE" }, (res) => {
+                    setTimeout(() => chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve({
+                        bakeryName: res.bakeryName,
+                        gameHash: gameHash[0]
+                    })), 500);
+                });
+            } else {
+                reject("No opened tab matching Cookie Clicker URL");
+            }
+        });
+    })
+    .then((res) => {
+        return fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}`, {
+            method: 'PATCH',
+            headers: new Headers({ 'Authorization': `Bearer ${token}` }),
+            body: res.gameHash
+        })
+    })
+    .then((res) => res.json());
 }
 
 async function renameSave(fileId, previousFilename, filename) {
