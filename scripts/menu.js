@@ -74,12 +74,14 @@ async function createSave() {
 async function listSaves() {
     crudRequestWrapper()
     .then((wrapper) => {
-        fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}` +
-        `&pageSize=5&q='${wrapper.folderId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false`, {
+        return fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}
+        &pageSize=5&q='${wrapper.folderId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false
+        &fields=*`, {
             headers: getHeaders(wrapper.token)
         })
         .then((res) => res.json())
         .then((filesJson) => {
+            console.log(filesJson);
             const listDiv = document.querySelector("#save-list");
 
             listDiv.innerHTML = "";
@@ -100,7 +102,10 @@ async function listSaves() {
                                 <a id="use-${file.id}" class="option">Use</a>
                                 <a id="delete-${file.id}" class="option warning">Delete</a>
                             </div>
-                        </div>`
+                        </div>
+                        <span class="text-grey text-italic" style="padding-left: 16px; padding-bottom: 6px">
+                            Last modification on ${formatDate(file.modifiedTime)}
+                        </span>`
                     );
 
                     document.querySelector(`#editable-${file.id}`).addEventListener('click', () => document.querySelector(`#filename-${file.id}`) ? startRenaming(file.id) : 0);
@@ -146,13 +151,14 @@ async function updateSave(fileId) {
 
 async function renameSave(fileId, previousFilename, filename) {
     if (previousFilename !== filename && filename.length > 0) {
-        const wrapper = await crudRequestWrapper();
-        
-        return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
-            method: 'PATCH',
-            headers: getHeaders(wrapper.token),
-            body: JSON.stringify({
-                name: `${filename + EXTENSION}`
+        getAuthToken()
+        .then((token) => {
+            return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+                method: 'PATCH',
+                headers: getHeaders(token),
+                body: JSON.stringify({
+                    name: `${filename + EXTENSION}`
+                })
             })
         })
         .then(() => listSaves());
@@ -262,4 +268,10 @@ function startRenaming(fileId) {
     field.replaceWith(textarea);
     textarea.style.height = textarea.scrollHeight + 'px';
     textarea.focus();
+}
+
+function formatDate(datestring) {
+    const date = new Date(datestring);
+
+    return date.toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
 }
