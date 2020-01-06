@@ -273,5 +273,5 @@ function startRenaming(fileId) {
 function formatDate(datestring) {
     const date = new Date(datestring);
 
-    return date.toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
+    return date.toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric' });
 }
