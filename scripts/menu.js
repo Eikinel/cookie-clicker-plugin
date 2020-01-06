@@ -76,7 +76,7 @@ async function listSaves() {
     .then((wrapper) => {
         return fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}
         &pageSize=5&q='${wrapper.folderId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false
-        &fields=*`, {
+        &fields=files(id, name, modifiedTime)`, {
             headers: getHeaders(wrapper.token)
         })
         .then((res) => res.json())
