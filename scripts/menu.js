@@ -81,7 +81,6 @@ async function listSaves() {
         })
         .then((res) => res.json())
         .then((filesJson) => {
-            console.log(filesJson);
             const listDiv = document.querySelector("#save-list");
 
             listDiv.innerHTML = "";
