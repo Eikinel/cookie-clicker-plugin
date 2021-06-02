@@ -14,6 +14,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             sendResponse({ bakeryName: bakeryName });
             break;
+        case "OPEN":
+            chrome.tabs.create({ url: 'https://orteil.dashnet.org/cookieclicker/' })
+            break;
         default:
             break;
     }

@@ -15,10 +15,11 @@ window.onload = async function() {
     }
 
     // Buttons listeners
+    document.querySelector("#open-tab").addEventListener('click', openTab)
     document.querySelector("#logout").addEventListener('click', () => {
         getAuthToken().then((token) => logout(token));
     });
-    document.querySelector("#refresh-list").addEventListener('click', () => listSaves());
+    document.querySelector("#refresh-list").addEventListener('click', listSaves);
     document.querySelector("#new-save").addEventListener('click', () => {
         createSave().then((res) => listSaves());
     });
@@ -238,6 +239,18 @@ async function getSaveFolderId(token) {
         return folder;
     })
     .then((folder) => folder.files[0].id);
+}
+
+async function openTab() {
+    chrome.tabs.query({ url: 'https://orteil.dashnet.org/cookieclicker/' }, ([tab]) => {
+        console.log(tab);
+        if (!tab) {
+            chrome.tabs.create({ url: 'https://orteil.dashnet.org/cookieclicker/' });
+            return;
+        }
+    
+        chrome.tabs.update(tab.id, { highlighted: true });
+    });
 }
 
 

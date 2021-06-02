@@ -11,6 +11,12 @@
     right: 10px;
 }
 
+#open-tab {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
 #save-list {
     margin: 10px 0;
 }
