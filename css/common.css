@@ -124,6 +124,7 @@ a.option {
     text-shadow: 0px 1px 1px #000;
     color: #ccc;
     line-height: 100%;
+    text-align: center;
 }
 
 a.option.warning {

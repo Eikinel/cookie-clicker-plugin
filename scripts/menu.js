@@ -77,30 +77,39 @@ async function listSaves() {
             listDiv.innerHTML = "";
 
             // Populate div
-            filesJson.files.forEach((file) => {
+            filesJson.files.forEach((file, index) => {
                 const match = file.name.match(/^([^\.]+)(\.cookie)$/gm);
 
                 if (match) {
                     listDiv.insertAdjacentHTML('beforeend', 
-                        `<div class="d-flex listing justify-content-flex-end align-items-center flex-wrap w-100">
-                            <div id="editable-${file.id}" class="d-flex align-items-center flex-grow-1">
-                                <span id="filename-${file.id}">${match[0].substring(0, match[0].length - 7)}</span>
-                                <i class="fas fa-pen text-white"></i>
+                        `<div class="d-flex listing justify-content-between align-items-center w-100 ${index < filesJson.files.length - 1 ? 'pb-3' : ''}">
+                            <div class="d-flex flex-column">
+                                <div id="editable-${file.id}" class="d-flex align-items-center flex-grow-1 pb-1">
+                                    <span id="filename-${file.id}">${match[0].substring(0, match[0].length - 7)}</span>
+                                    <i class="fas fa-pen text-white"></i>
+                                </div>
+                                <span class="text-grey text-italic text-normal text-12">
+                                    Last modification on ${formatDate(file.modifiedTime)}
+                                </span>
                             </div>
-                            <div class="d-flex">
-                                <a id="save-${file.id}" class="option">Save</a>
-                                <a id="use-${file.id}" class="option">Use</a>
-                                <a id="delete-${file.id}" class="option warning">Delete</a>
+                            
+                            <div class="d-flex flex-column align-items-center justify-content-center">
+                                <div class="d-flex w-100">
+                                    <a id="save-${file.id}" class="option w-100">Save</a>
+                                </div>
+                                <div class="d-flex">
+                                    <a id="use-${file.id}" class="option">Use</a>
+                                    <a id="copy-${file.id}" class="option">Copy</a>
+                                    <a id="delete-${file.id}" class="option warning">Delete</a>
+                                </div>
                             </div>
-                        </div>
-                        <span class="text-grey text-italic" style="padding-left: 16px; padding-bottom: 6px">
-                            Last modification on ${formatDate(file.modifiedTime)}
-                        </span>`
+                        </div>`
                     );
 
                     document.querySelector(`#editable-${file.id}`).addEventListener('click', () => document.querySelector(`#filename-${file.id}`) ? startRenaming(file.id) : 0);
                     document.querySelector(`#save-${file.id}`).addEventListener('click', () => updateSave(file.id).then(() => listSaves()));
                     document.querySelector(`#use-${file.id}`).addEventListener('click', () => useSave(file.id));
+                    document.querySelector(`#copy-${file.id}`).addEventListener('click', () => copySaveToClipboard(file.id));
                     document.querySelector(`#delete-${file.id}`).addEventListener('click', () => deleteSave(file.id).then(() => listSaves()));
                 }
             });
@@ -191,6 +200,16 @@ async function useSave(fileId) {
             });
         }
     })
+}
+
+async function copySaveToClipboard(fileId) {
+    const token = await getAuthToken();
+
+    fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        headers: getHeaders(token)
+    })
+    .then((res) => res.text())
+    .then((gameHash) => navigator.clipboard.writeText(gameHash));
 }
 
 
