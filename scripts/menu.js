@@ -3,26 +3,16 @@ const EXTENSION = ".cookie";
 
 // Check authentication
 window.onload = async function() {
-    const pStorage = new Promise((resolve) => {
-        chrome.storage.local.get(["userInfo"], (storage) => resolve(storage));
+    getUserInfo().then((userInfo) => {
+        document.querySelector("#name").innerHTML = userInfo.given_name;
+        document.querySelector("#avatar").src = userInfo.picture;
     });
-    const storage = await pStorage;
-
-    // Set user's data from storage
-    if (storage.userInfo) {
-        document.querySelector("#name").innerHTML = storage.userInfo.given_name;
-        document.querySelector("#avatar").src = storage.userInfo.picture;
-    }
 
     // Buttons listeners
-    document.querySelector("#open-tab").addEventListener('click', openTab)
-    document.querySelector("#logout").addEventListener('click', () => {
-        getAuthToken().then((token) => logout(token));
-    });
-    document.querySelector("#refresh-list").addEventListener('click', listSaves);
-    document.querySelector("#new-save").addEventListener('click', () => {
-        createSave().then((res) => listSaves());
-    });
+    document.querySelector("#open-tab").addEventListener('click', () => openTab())
+    document.querySelector("#logout").addEventListener('click', () => getAuthToken().then((token) => logout(token)));
+    document.querySelector("#refresh-list").addEventListener('click', () => listSaves());
+    document.querySelector("#new-save").addEventListener('click', () => createSave().then((res) => listSaves()));
 
     // List user's saves from Drive
     listSaves();
@@ -224,6 +214,10 @@ async function getSaveFolderId(token) {
     })
     .then((res) => res.json())
     .then((folder) => {
+        if (!folder.files) {
+            throw new Error('Error retrieving files from Drive');
+        }
+
         // Create new folder if it doesn't exist
         if (folder.files.length < 1) {
             return fetch(`https://www.googleapis.com/drive/v3/files?key=${API_KEY}`, {
@@ -238,7 +232,7 @@ async function getSaveFolderId(token) {
     
         return folder;
     })
-    .then((folder) => folder.files[0].id);
+    .then((folder) => folder.files[0].id)
 }
 
 async function openTab() {
