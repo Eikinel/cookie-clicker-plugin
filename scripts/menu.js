@@ -83,7 +83,7 @@ async function listSaves() {
                 if (match) {
                     listDiv.insertAdjacentHTML('beforeend', 
                         `<div class="d-flex listing justify-content-between align-items-center w-100 ${index < filesJson.files.length - 1 ? 'pb-3' : ''}">
-                            <div class="d-flex flex-column">
+                            <div class="d-flex flex-column w-100">
                                 <div id="editable-${file.id}" class="d-flex align-items-center flex-grow-1 pb-1">
                                     <span id="filename-${file.id}">${match[0].substring(0, match[0].length - 7)}</span>
                                     <i class="fas fa-pen text-white"></i>
@@ -93,15 +93,11 @@ async function listSaves() {
                                 </span>
                             </div>
                             
-                            <div class="d-flex flex-column align-items-center justify-content-center">
-                                <div class="d-flex w-100">
-                                    <a id="save-${file.id}" class="option w-100">Save</a>
-                                </div>
-                                <div class="d-flex">
-                                    <a id="use-${file.id}" class="option">Use</a>
-                                    <a id="copy-${file.id}" class="option">Copy</a>
-                                    <a id="delete-${file.id}" class="option warning">Delete</a>
-                                </div>
+                            <div class="actions d-flex flex-wrap justify-content-end">
+                                <a id="save-${file.id}" class="option">Save</a>
+                                <a id="use-${file.id}" class="option">Use</a>
+                                <a id="copy-${file.id}" class="option">Copy</a>
+                                <a id="delete-${file.id}" class="option warning">Delete</a>
                             </div>
                         </div>`
                     );

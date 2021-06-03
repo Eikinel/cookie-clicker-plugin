@@ -47,3 +47,8 @@ div > .fa-pen {
 div:hover > .fa-pen {
     display: inline-block;
 }
+
+.actions > a {
+    flex-grow: 1;
+    flex-basis: 25%;
+}
