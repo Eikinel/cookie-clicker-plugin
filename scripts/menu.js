@@ -13,14 +13,10 @@ window.onload = async function() {
     setLoader('avatar', pGetUserInfo);
 
     // Buttons listeners
-    document.querySelector("#open-tab").addEventListener('click', () => openTab())
-    document.querySelector("#logout").addEventListener('click', () => {
-        getAuthToken().then((token) => logout(token))
-    });
-    document.querySelector("#refresh-list").addEventListener('click', () => {
-        listSaves({ loader: true }).then(() => new Snackbar('', 'Saves has been refreshed'));
-    });
-    document.querySelector("#new-save").addEventListener('click', () => createSave().then((res) => listSaves()));
+    addActionEventListener('open-tab', () => openTab());
+    addActionEventListener('logout', () => getAuthToken().then((token) => logout(token)));
+    addActionEventListener('refresh-list', () => listSaves({ loader: true }).then(() => new Snackbar('', 'Saves has been refreshed')));
+    addActionEventListener('new-save', () => createSave().then((res) => listSaves()));
 
     // List user's saves from Drive
     listSaves({ loader: true });
@@ -31,7 +27,8 @@ window.onload = async function() {
 async function createSave() {
     let bakeryName;
     const wrapper = await crudRequestWrapper();
-    const pCreateSave = new Promise((resolve) => {
+    
+    return new Promise((resolve) => {
         chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tabs) => resolve(tabs))
     })
     .then((tabs) => {
@@ -76,10 +73,6 @@ async function createSave() {
         return res.json();
     })
     .catch((err) => new Snackbar('Create save error', `An error occured while creating save file : ${err}`));
-
-    setLoader('new-save', pCreateSave);
-
-    return pCreateSave;
 }
 
 async function listSaves(options) {
@@ -132,28 +125,25 @@ async function listSaves(options) {
 
                     document.querySelector(`#editable-${file.id}`).addEventListener('click', () => {
                         if (document.querySelector(`#filename-${file.id}`)) {
-                            startRenaming(file.id)
+                            startRenaming(file.id);
                         }
                     });
-                    document.querySelector(`#save-${file.id}`).addEventListener('click', () => {
-                        updateSave(file.id, trimExtension(file.name)).finally(() => listSaves())
-                    });
-                    document.querySelector(`#use-${file.id}`).addEventListener('click', () => useSave(file.id, trimExtension(file.name)));
-                    document.querySelector(`#copy-${file.id}`).addEventListener('click', () => copySaveToClipboard(file.id));
-                    document.querySelector(`#delete-${file.id}`).addEventListener('click', () => {
-                        deleteSave(file.id, trimExtension(file.name)).finally(() => listSaves())
-                    });
+                    addActionEventListener(`save-${file.id}`, async () => updateSave(file.id, trimExtension(file.name)).then(() => listSaves()));
+                    addActionEventListener(`use-${file.id}`, async () => useSave(file.id, trimExtension(file.name)));
+                    addActionEventListener(`copy-${file.id}`, async () => copySaveToClipboard(file.id));
+                    addActionEventListener(`delete-${file.id}`, async () => deleteSave(file.id, trimExtension(file.name)).then(() => listSaves()));
                 }
             });
         })
     })
-    .catch((err) => new Snackbar('List save error', `An error occured while fetching save files : ${err}`))
+    .catch((err) => new Snackbar('List save error', `An error occured while fetching save files : ${err}`));
 }
 
 
 async function updateSave(fileId, filename) {
     const token = await getAuthToken();
-    const pUdateSave = new Promise((resolve) => {
+    
+    return new Promise((resolve) => {
         chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tabs) => resolve(tabs))
     })
     .then((tabs) => {
@@ -182,10 +172,6 @@ async function updateSave(fileId, filename) {
         return res.json();
     })
     .catch((err) => new Snackbar('Update save error', `An error occured while creating save file : ${err}`));
-
-    setLoader(`save-${fileId}`, pUdateSave);
-
-    return pUdateSave;
 }
 
 async function renameSave(fileId, previousFilename, filename) {
@@ -216,16 +202,13 @@ async function renameSave(fileId, previousFilename, filename) {
 
 async function deleteSave(fileId, filename) {
     const token = await getAuthToken();
-    const pDeleteSave = fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+    
+    return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
         method: 'DELETE',
         headers: getHeaders(token)
     })
     .then(() => new Snackbar('Delete', `The save "${filename}" has been successfuly deleted.`))
     .catch((err) => new Snackbar('Delete', `An error occured while deleting save : ${err}`));
-
-    setLoader(`delete-${fileId}`, pDeleteSave);
-
-    return pDeleteSave;
 }
 
 async function useSave(fileId, filename) {
@@ -240,7 +223,7 @@ async function useSave(fileId, filename) {
         chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tabs) => resolve(tabs))
     })
 
-    const pAll = Promise.all([pGameHash, pTabs])
+    return Promise.all([pGameHash, pTabs])
     .then(([gameHash, tabs]) => {
         if (tabs && tabs[0]) {
             chrome.tabs.sendMessage(tabs[0].id, {
@@ -252,15 +235,13 @@ async function useSave(fileId, filename) {
             throw 'Cookie Clicker is not opened in any tab, the game cannot be loaded.';
         }
     })
-    .catch((err) => new Snackbar('Loading error', `An error occured while reading save file : ${err}`))
-
-    setLoader(`use-${fileId}`, pAll);
+    .catch((err) => new Snackbar('Loading error', `An error occured while reading save file : ${err}`));
 }
 
 async function copySaveToClipboard(fileId) {
     const token = await getAuthToken();
-
-    fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+    
+    return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
         headers: getHeaders(token)
     })
     .catch((err) => new Snackbar('Copy error', `An error occured while copying save to clipboard : ${err}`))
@@ -367,4 +348,11 @@ function formatDate(datestring) {
 
 function trimExtension(filename) {
     return filename.substring(0, filename.length - EXTENSION.length);
+}
+
+function addActionEventListener(elemId, callback) {
+    document.querySelector(`#${elemId}`).addEventListener('click', () => {
+        if (isLoading(elemId)) return;
+        setLoader(elemId, callback());
+    });
 }

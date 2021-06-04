@@ -63,9 +63,11 @@ function setLoader(elemId, promise) {
         elem.src = '../images/cookie-256.png';
         promise.finally(() => elem.classList.remove('loader'));
     } else {
-        const elemContent = elem.innerHTML.slice(); // Copy HTML content
-
-        elem.innerHTML = '<div class="loader"></div>';
-        promise.finally(() => elem.innerHTML = elemContent);
+        elem.classList.add('disabled');
+        promise.finally(() => elem.classList.remove('disabled'));
     }
+}
+
+function isLoading(elemId) {
+    return document.querySelector(`#${elemId}`).classList.contains('disabled');
 }
