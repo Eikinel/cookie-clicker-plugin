@@ -142,9 +142,9 @@ a.option.warning:active {
 }
 
 a.option.disabled {
-    color: #666;
-    border-color: #666;
-    cursor: default;
+    color: #666 !important;
+    border-color: #666 !important;
+    cursor: default !important;
 }
 
 input {

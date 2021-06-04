@@ -68,7 +68,7 @@ async function createSave() {
     .then((res) => {
         if (!res.ok) throw `creating save file from Drive failed with HTTP status ${res.status}`;
 
-        new Snackbar('Create save', `The game has been successfully created in new file "${bakeryName}"`);
+        new Snackbar('Save file created', `The game has been successfully created in new file "${bakeryName}"`);
 
         return res.json();
     })
@@ -168,7 +168,7 @@ async function updateSave(fileId, filename) {
         })
     })
     .then((res) => {
-        new Snackbar('Update save', `Game has been saved in file "${filename}"`);
+        new Snackbar('Save file updated', `Game has been saved in file "${filename}"`);
         return res.json();
     })
     .catch((err) => new Snackbar('Update save error', `An error occured while creating save file : ${err}`));
@@ -207,8 +207,8 @@ async function deleteSave(fileId, filename) {
         method: 'DELETE',
         headers: getHeaders(token)
     })
-    .then(() => new Snackbar('Delete', `The save "${filename}" has been successfuly deleted.`))
-    .catch((err) => new Snackbar('Delete', `An error occured while deleting save : ${err}`));
+    .then(() => new Snackbar('Save file deleted', `The save "${filename}" has been successfuly deleted.`))
+    .catch((err) => new Snackbar('Delete error', `An error occured while deleting save : ${err}`));
 }
 
 async function useSave(fileId, filename) {
