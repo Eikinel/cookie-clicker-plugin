@@ -31,7 +31,7 @@ class UIFeedback {
                         document.getElementById('dialog-container').remove();
                         break;
                 }
-                snackbarQueue = snackbarQueue.filter((snackbar) => snackbar.id !== this.id);
+                UIFeedbacksQueue[this.type] = UIFeedbacksQueue[this.type].filter((UIFeedback) => UIFeedback.id !== this.id);
             }
         }, timeout + this.animationSpeed);
     }
@@ -85,15 +85,31 @@ class Dialog extends UIFeedback {
         ${this.title ? `
         <div class="text-bold text-18 pb-2">${this.title}</div>` : ''}
         <i class="fa fa-times text-14"></i>
-        <div class="dialog-content">${this.content}</div>
-        ${buttons.forEach((button) => {
-            button.addEventListener('click', () => button.callback);
-            return <a class="option">${button.name}</a>
-        })}
+        <div class="dialog-content pb-2">${this.content}</div>
+        <div class="dialog-footer"></div>
         `
+        
+        this.buttonListeners = [];
+        buttons.forEach((button) => {
+            const buttonElem = document.createElement('a');
+
+            this.buttonListeners.push(
+                new Promise((resolve) => buttonElem.addEventListener('click', () => {
+                    this.close();
+                    resolve(button.validate);
+                }))
+            );
+            buttonElem.classList.add('option', ...(button.classList || []));
+            buttonElem.innerHTML = button.label;
+            this.elem.getElementsByClassName('dialog-footer')[0].insertAdjacentElement('beforeend', buttonElem);
+        });
 
         this.elem.getElementsByClassName('fa-times')[0].addEventListener('click', () => this.close());
         parent.appendChild(this.elem);
         setTimeout(() => this.elem.classList.remove('fade-in'), this.animationSpeed);
+    }
+
+    async onClose(callback) {
+        return new Promise((resolve) => Promise.race(this.buttonListeners).then((value) => resolve(callback(value))));
     }
 }

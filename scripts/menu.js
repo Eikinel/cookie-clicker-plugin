@@ -12,8 +12,17 @@ window.onload = async function() {
     
     new Dialog('Confirmation', `
     <div>Are you sure you want to delete save file?</div>
-    <div class="text-bold">This action is irreversible.</div>`
-    );
+    <div class="text-bold">This action is irreversible.</div>`,
+    [
+        { label: 'I changed my mind', validate: false },
+        { label: 'Yes, delete this', classList: ['warning'], validate: true },
+    ])
+    .onClose((validate) => {
+        console.log(validate);
+        if (validate) {
+            console.log("OK");
+        }
+    });
 
     setLoader('avatar', pGetUserInfo);
 
