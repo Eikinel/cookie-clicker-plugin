@@ -52,9 +52,3 @@ div:hover > .fa-pen {
     flex-grow: 1;
     flex-basis: 25%;
 }
-
-#snackbar-overlay {
-    flex-flow: column wrap;
-    max-height: -webkit-fill-available;
-    place-content: flex-start;
-}

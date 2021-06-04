@@ -9,6 +9,11 @@ window.onload = async function() {
         document.querySelector("#name").innerHTML = userInfo.given_name;
         document.querySelector("#avatar").src = userInfo.picture;
     });
+    
+    new Dialog('Confirmation', `
+    <div>Are you sure you want to delete save file?</div>
+    <div class="text-bold">This action is irreversible.</div>`
+    );
 
     setLoader('avatar', pGetUserInfo);
 
@@ -203,7 +208,7 @@ async function renameSave(fileId, previousFilename, filename) {
 async function deleteSave(fileId, filename) {
     const token = await getAuthToken();
     
-    return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+    fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
         method: 'DELETE',
         headers: getHeaders(token)
     })
