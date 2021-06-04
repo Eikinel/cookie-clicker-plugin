@@ -53,3 +53,19 @@ function getHeaders(token, contentType = "application/json") {
 function generateId() {
     return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 }
+
+function setLoader(elemId, promise) {
+    const elem = document.querySelector(`#${elemId}`);
+
+    // Image
+    if (elem.alt) {
+        elem.classList.add('loader');
+        elem.src = '../images/cookie-256.png';
+        promise.finally(() => elem.classList.remove('loader'));
+    } else {
+        const elemContent = elem.innerHTML.slice(); // Copy HTML content
+
+        elem.innerHTML = '<div class="loader"></div>';
+        promise.finally(() => elem.innerHTML = elemContent);
+    }
+}

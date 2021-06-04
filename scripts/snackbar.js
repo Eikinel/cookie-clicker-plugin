@@ -2,7 +2,7 @@ var snackbarQueue = [];
 var animationSpeed = 300;
 
 class Snackbar {
-    constructor(title, content, timeout = 3000, image = null) {
+    constructor(title, content = '', timeout = 3000, image = null) {
         this.id = generateId();
         this.title = title;
         this.content = content;
@@ -13,7 +13,7 @@ class Snackbar {
         this.elem.classList.add('snackbar', 'fade-in', 'position-relative');
         this.elem.innerHTML = `
         <i class="fa fa-times text-14"></i>
-        <div class="text-bold text-18 pb-2">${this.title}</div>
+        ${this.title ? `<div class="text-bold text-18 pb-2">${this.title}</div>` : ''}
         <div class="text-12">${this.content}</div>
         `
 
