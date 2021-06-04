@@ -5,15 +5,17 @@
     <script type="text/javascript" src="../api_key.js"></script>
     <script type="text/javascript" src="../scripts/common.js"></script>
     <script type="text/javascript" src="../scripts/menu.js"></script>
+    <script type="text/javascript" src="../scripts/snackbar.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Merriweather:300,300i,400,400i,700,700i,900,900i&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/menu.css">
+    <link rel="stylesheet" href="../css/snackbar.css">
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="../css/bootlegstrap.css">
     <link rel="stylesheet" href="../lib/fontawesome-free-5.12.0-web/css/all.min.css">
   </head>
     
   <body>
-    <div class="d-flex flex-column fill">
+    <div class="d-flex flex-column fill position-relative">
       <a id="open-tab" class="option">Open game</a>
       <a id="logout" class="option">Sign out</a>
 
@@ -35,5 +37,7 @@
         <div id="save-list" class="d-flex flex-column w-100"></div>
       </div>
     </div>
+
+    <div id="snackbar-overlay" class="d-flex fill position-absolute"></div>
   </body>
 </html>

@@ -51,6 +51,14 @@
     font-size: 12px !important;
 }
 
+.text-14 {
+    font-size: 14px !important;
+}
+
+.text-16 {
+    font-size: 16px !important;
+}
+
 .text-18 {
     font-size: 18px !important;
 }
@@ -107,6 +115,10 @@
     width: 100%;
 }
 
+.w-100 {
+    height: 100%;
+}
+
 .pb-1 {
     padding-bottom: 0.25rem;
 }
@@ -125,4 +137,12 @@
 
 .pb-4 {
     padding-bottom: 1.25rem;
+}
+
+.position-relative {
+    position: relative;
+}
+
+.position-absolute {
+    position: absolute;
 }

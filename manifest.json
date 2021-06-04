@@ -7,7 +7,7 @@
       "*://orteil.dashnet.org/cookieclicker/*"
     ],
     "oauth2": {
-      "client_id": "457978225628-17m0dautimr8bh3cc3ba37uio6km8epq.apps.googleusercontent.com",
+      "client_id": "457978225628-se8vs3031uv5eqavd9o8q9tlqnq6fgvs.apps.googleusercontent.com",
       "scopes": [
         "https://www.googleapis.com/auth/drive.file",
         "https://www.googleapis.com/auth/drive.appdata",
