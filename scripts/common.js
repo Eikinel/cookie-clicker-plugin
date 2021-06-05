@@ -8,7 +8,7 @@ async function getAuthToken() {
         if (token) {
             resolve(token);
         } else {
-            chrome.browserAction.getPopup({}, (popup) => !popup.match(/\/(login\.html)/g) ? logout() : 0);
+            chrome.action.getPopup({}, (popup) => !popup.match(/\/(login\.html)/g) ? logout() : 0);
             reject(AuthenticationException.INVALID_TOKEN);
         }
     }));
@@ -40,7 +40,7 @@ async function logout(token) {
 }
 
 function switchFrame(frame) {
-    chrome.browserAction.setPopup({popup: `html/${frame}.html`}, () => window.location.href = `${frame}.html`);
+    chrome.action.setPopup({popup: `html/${frame}.html`}, () => window.location.href = `${frame}.html`);
 }
 
 function getHeaders(token, contentType = "application/json") {
