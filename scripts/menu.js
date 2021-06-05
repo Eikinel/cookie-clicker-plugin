@@ -107,7 +107,7 @@ async function listSaves(options) {
                             <div class="d-flex flex-column w-100">
                                 <div id="editable-${file.id}" class="d-flex align-items-center flex-grow-1 pb-1">
                                     <span id="filename-${file.id}">${match[0].substring(0, match[0].length - 7)}</span>
-                                    <i class="fas fa-pen text-white"></i>
+                                    <i class="fa fa-pen text-white"></i>
                                 </div>
                                 <span class="text-grey text-italic text-normal text-12">
                                     Last modification on ${formatDate(file.modifiedTime)}
@@ -151,7 +151,7 @@ async function listSaves(options) {
     })
     .catch((err) => {
         new Snackbar('List save error', `An error occured while fetching save files : ${err}`);
-        listDiv.innerHTML = '<span class="text-red text-12">Could not refresh, please retry.</div>'
+        listDiv.innerHTML = '<span class="text-red text-14 align-self-center">Could not refresh, please retry.</div>'
     });
 }
 

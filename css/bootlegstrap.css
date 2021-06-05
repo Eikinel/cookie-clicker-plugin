@@ -23,6 +23,10 @@
     align-items: center;
 }
 
+.align-self-center {
+    align-self: center;
+}
+
 .justify-content-between {
     justify-content: space-between;
 }
