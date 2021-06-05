@@ -10,20 +10,6 @@ window.onload = async function() {
         document.querySelector("#avatar").src = userInfo.picture;
     });
     
-    new Dialog('Confirmation', `
-    <div>Are you sure you want to delete save file?</div>
-    <div class="text-bold">This action is irreversible.</div>`,
-    [
-        { label: 'I changed my mind', validate: false },
-        { label: 'Yes, delete this', classList: ['warning'], validate: true },
-    ])
-    .onClose((validate) => {
-        console.log(validate);
-        if (validate) {
-            console.log("OK");
-        }
-    });
-
     setLoader('avatar', pGetUserInfo);
 
     // Buttons listeners
@@ -145,7 +131,20 @@ async function listSaves(options) {
                     addActionEventListener(`save-${file.id}`, async () => updateSave(file.id, trimExtension(file.name)).then(() => listSaves()));
                     addActionEventListener(`use-${file.id}`, async () => useSave(file.id, trimExtension(file.name)));
                     addActionEventListener(`copy-${file.id}`, async () => copySaveToClipboard(file.id));
-                    addActionEventListener(`delete-${file.id}`, async () => deleteSave(file.id, trimExtension(file.name)).then(() => listSaves()));
+                    addActionEventListener(`delete-${file.id}`, async () => {
+                        new Dialog('Confirmation', `
+                        <div>Are you sure you want to delete save file?</div>
+                        <div class="text-bold">This action is irreversible.</div>`,
+                        [
+                            { label: 'I changed my mind', validate: false },
+                            { label: 'Yes, delete this', classList: ['warning'], validate: true },
+                        ])
+                        .onClose((validate) => {
+                            if (validate) {
+                                deleteSave(file.id, trimExtension(file.name)).then(() => listSaves())
+                            }
+                        });
+                    });
                 }
             });
         })
@@ -217,7 +216,7 @@ async function renameSave(fileId, previousFilename, filename) {
 async function deleteSave(fileId, filename) {
     const token = await getAuthToken();
     
-    fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+    return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
         method: 'DELETE',
         headers: getHeaders(token)
     })
