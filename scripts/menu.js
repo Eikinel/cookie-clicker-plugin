@@ -9,7 +9,7 @@ window.onload = async function() {
         document.querySelector("#name").innerHTML = userInfo.given_name;
         document.querySelector("#avatar").src = userInfo.picture;
     });
-    
+
     setLoader('avatar', pGetUserInfo);
 
     // Buttons listeners
@@ -189,7 +189,7 @@ async function updateSave(fileId, filename) {
 
 async function renameSave(fileId, previousFilename, filename) {
     if (previousFilename !== filename && filename.length > 0) {
-        getAuthToken()
+        return getAuthToken()
         .then((token) => {
             return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
                 method: 'PATCH',
