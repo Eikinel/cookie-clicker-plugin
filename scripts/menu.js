@@ -35,11 +35,18 @@ async function createSave() {
         return new Promise((resolve, reject) => {
             if (tabs && tabs[0]) {
                 chrome.tabs.sendMessage(tabs[0].id, { type: "SAVE" }, (res) => {
+                    console.log(bakeryName);
                     bakeryName = res.bakeryName;
-                    setTimeout(() => chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve({
-                        bakeryName: res.bakeryName,
-                        gameHash: gameHash[0]
-                    })), 500);
+                    setTimeout(() => chrome.scripting.executeScript(
+                        { 
+                            target: { tabId: tabs[0].id },
+                            function: getGameHash,
+                        },
+                        (gameHash) => resolve({
+                            bakeryName: res.bakeryName,
+                            gameHash: gameHash[0].result
+                        })
+                    ), 500);
                 });
             } else {
                 reject("Cookie Clicker is not opened in any tab, the game cannot be saved.");
@@ -88,73 +95,72 @@ async function listSaves(options) {
         &pageSize=5&q='${wrapper.folderId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false
         &fields=files(id, name, modifiedTime)`, {
             headers: getHeaders(wrapper.token)
-        })
-        .then((res) => {
-            if (!res.ok) throw `fetching files from Drive failed with HTTP status ${res.status}`;
-            return res.json();
-        })
-        .then((filesJson) => {
-            // Clear loader
-            listDiv.innerHTML = ''
+        });
+    })
+    .then((res) => {
+        if (!res.ok) throw `fetching files from Drive failed with HTTP status ${res.status}`;
+        return res.json();
+    })
+    .then((filesJson) => {
+        // Clear loader
+        listDiv.innerHTML = ''
 
-            // Populate div
-            filesJson.files?.forEach((file, index) => {
-                const match = file.name.match(/^([^\.]+)(\.cookie)$/gm);
+        // Populate div
+        filesJson.files?.forEach((file, index) => {
+            const match = file.name.match(/^([^\.]+)(\.cookie)$/gm);
 
-                if (match) {
-                    listDiv.insertAdjacentHTML('beforeend', 
-                        `<div class="d-flex listing justify-content-between align-items-center w-100 ${index < filesJson.files.length - 1 ? 'pb-3' : ''}">
-                            <div class="d-flex flex-column w-100">
-                                <div id="editable-${file.id}" class="d-flex align-items-center flex-grow-1 pb-1">
-                                    <span id="filename-${file.id}">${match[0].substring(0, match[0].length - 7)}</span>
-                                    <i class="fa fa-pen text-white"></i>
-                                </div>
-                                <span class="text-grey text-italic text-normal text-12">
-                                    Last modification on ${formatDate(file.modifiedTime)}
-                                </span>
-                            </div>
-                            
-                            <div class="actions d-flex flex-wrap justify-content-end">
-                                <a id="save-${file.id}" class="option">Save</a>
-                                <a id="use-${file.id}" class="option">Use</a>
-                                <a id="copy-${file.id}" class="option">Copy</a>
-                                <a id="delete-${file.id}" class="option warning">Delete</a>
-                            </div>
-                        </div>`
-                    );
+            if (match) {
+                listDiv.insertAdjacentHTML('beforeend', 
+                `<div class="d-flex listing justify-content-between align-items-center w-100 ${index < filesJson.files.length - 1 ? 'pb-3' : ''}">
+                    <div class="d-flex flex-column w-100">
+                        <div id="editable-${file.id}" class="d-flex align-items-center flex-grow-1 pb-1">
+                            <span id="filename-${file.id}">${match[0].substring(0, match[0].length - 7)}</span>
+                            <i class="fa fa-pen text-white"></i>
+                        </div>
+                        <span class="text-grey text-italic text-normal text-12">
+                            Last modification on ${formatDate(file.modifiedTime)}
+                        </span>
+                    </div>
+                        
+                    <div class="actions d-flex flex-wrap justify-content-end">
+                        <a id="save-${file.id}" class="option">Save</a>
+                        <a id="use-${file.id}" class="option">Use</a>
+                        <a id="copy-${file.id}" class="option">Copy</a>
+                        <a id="delete-${file.id}" class="option warning">Delete</a>
+                    </div>
+                </div>`
+                );
 
-                    document.querySelector(`#editable-${file.id}`).addEventListener('click', () => {
-                        if (document.querySelector(`#filename-${file.id}`)) {
-                            startRenaming(file.id);
+                document.querySelector(`#editable-${file.id}`).addEventListener('click', () => {
+                    if (document.querySelector(`#filename-${file.id}`)) {
+                        startRenaming(file.id);
+                    }
+                });
+                addActionEventListener(`save-${file.id}`, async () => updateSave(file.id, trimExtension(file.name)).then(() => listSaves()));
+                addActionEventListener(`use-${file.id}`, async () => useSave(file.id, trimExtension(file.name)));
+                addActionEventListener(`copy-${file.id}`, async () => copySaveToClipboard(file.id));
+                addActionEventListener(`delete-${file.id}`, async () => {
+                    new Dialog('Confirmation', `
+                    <div>Are you sure you want to delete "${trimExtension(file.name)}"?</div>
+                    <div class="text-bold">This action is irreversible.</div>`,
+                    [
+                        { label: 'I changed my mind', validate: false },
+                        { label: 'Yes, delete this', classList: ['warning'], validate: true },
+                    ])
+                    .onClose((validate) => {
+                        if (validate) {
+                            deleteSave(file.id, trimExtension(file.name)).then(() => listSaves())
                         }
                     });
-                    addActionEventListener(`save-${file.id}`, async () => updateSave(file.id, trimExtension(file.name)).then(() => listSaves()));
-                    addActionEventListener(`use-${file.id}`, async () => useSave(file.id, trimExtension(file.name)));
-                    addActionEventListener(`copy-${file.id}`, async () => copySaveToClipboard(file.id));
-                    addActionEventListener(`delete-${file.id}`, async () => {
-                        new Dialog('Confirmation', `
-                        <div>Are you sure you want to delete save file?</div>
-                        <div class="text-bold">This action is irreversible.</div>`,
-                        [
-                            { label: 'I changed my mind', validate: false },
-                            { label: 'Yes, delete this', classList: ['warning'], validate: true },
-                        ])
-                        .onClose((validate) => {
-                            if (validate) {
-                                deleteSave(file.id, trimExtension(file.name)).then(() => listSaves())
-                            }
-                        });
-                    });
-                }
-            });
-        })
+                });
+            }
+        });
     })
     .catch((err) => {
         new Snackbar('List save error', `An error occured while fetching save files : ${err}`);
         listDiv.innerHTML = '<span class="text-red text-14 align-self-center">Could not refresh, please retry.</div>'
     });
 }
-
 
 async function updateSave(fileId, filename) {
     const token = await getAuthToken();
@@ -166,10 +172,16 @@ async function updateSave(fileId, filename) {
         return new Promise((resolve, reject) => {
             if (tabs && tabs[0]) {
                 chrome.tabs.sendMessage(tabs[0].id, { type: "SAVE" }, (res) => {
-                    setTimeout(() => chrome.tabs.executeScript(tabs[0].id, { code: "localStorage.getItem('CookieClickerGame')" }, (gameHash) => resolve({
-                        bakeryName: res.bakeryName,
-                        gameHash: gameHash[0]
-                    })), 500);
+                    setTimeout(() => chrome.scripting.executeScript(
+                        { 
+                            target: { tabId: tabs[0].id },
+                            function: getGameHash,
+                        },
+                        (gameHash) => resolve({
+                            bakeryName: res.bakeryName,
+                            gameHash: gameHash[0].result
+                        })
+                    ), 500);
                 });
             } else {
                 reject("Cookie Clicker is not opened in any tab, the game cannot be saved.");
@@ -315,7 +327,7 @@ async function getSaveFolderId(token) {
     .catch((err) => new Snackbar('Fetch error', `An error occured while fetching game data : ${err}`))
 }
 
-async function openTab() {
+function openTab() {
     chrome.tabs.query({ url: 'https://orteil.dashnet.org/cookieclicker/' }, ([tab]) => {
         console.log(tab);
         if (!tab) {
@@ -325,6 +337,10 @@ async function openTab() {
     
         chrome.tabs.update(tab.id, { highlighted: true });
     });
+}
+
+function getGameHash() {
+    return window.localStorage.getItem('CookieClickerGame');
 }
 
 

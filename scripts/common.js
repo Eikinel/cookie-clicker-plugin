@@ -1,7 +1,14 @@
-const AuthenticationException = {
+const AUTHENTICATION_EXCEPTION = {
     CANCELED_LOGIN: 0,
     INVALID_TOKEN: 1
 };
+
+const LISTENER_TYPE = {
+    GET: "get",
+    LOAD: "load",
+    SAVE: "save",
+    OPEN: "open",
+}
 
 async function getAuthToken() {
     return new Promise((resolve, reject) => chrome.identity.getAuthToken({ interactive: false }, (token) => {
@@ -9,7 +16,7 @@ async function getAuthToken() {
             resolve(token);
         } else {
             chrome.action.getPopup({}, (popup) => !popup.match(/\/(login\.html)/g) ? logout() : 0);
-            reject(AuthenticationException.INVALID_TOKEN);
+            reject(AUTHENTICATION_EXCEPTION.INVALID_TOKEN);
         }
     }));
 }
