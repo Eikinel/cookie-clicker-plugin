@@ -3,6 +3,8 @@
     max-height: -webkit-fill-available;
     place-content: flex-start;
     pointer-events: none;
+    margin-right: 21px;
+    width: -webkit-fill-available;
 }
 
 .snackbar {

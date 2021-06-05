@@ -43,7 +43,7 @@ class UIFeedback {
 }
 
 class Snackbar extends UIFeedback {
-    constructor(title, content = '', timeout = 30000000) {
+    constructor(title, content = '', timeout = 3000) {
         super(UI_FEEDBACK_ELEMENT.SNACKBAR, title, content);
         
         this.timeout = timeout;

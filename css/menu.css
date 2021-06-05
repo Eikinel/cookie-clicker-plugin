@@ -52,3 +52,30 @@ div:hover > .fa-pen {
     flex-grow: 1;
     flex-basis: 25%;
 }
+
+.footer {
+    display: flex;
+    flex-direction: row;
+    align-self: flex-end;
+    margin-bottom: 0.5rem;
+}
+
+#donateButton {
+    border: 0px;
+    display: inline-block;
+    border-radius: 4px;
+    background: #fc6;
+    background: linear-gradient(to bottom,#fff 0%,#fc6 45%,#f90 50%,#f66 100%);
+    box-shadow: 0px 0px 1px #fff inset, 0px 0px 0px 1px #f66;
+    text-shadow: 0px -1px 0px #fc6, 0px 1px 0px #f66;
+    cursor: pointer;
+    font-size: 9px;
+    font-weight: bold;
+    opacity: 0.9;
+}
+
+#donateButton:hover {
+    border: 0px;
+    box-shadow: 0px 0px 4px #fff inset, 0px 0px 0px 1px #f66;
+    opacity: 1;
+}
