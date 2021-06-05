@@ -15,8 +15,6 @@ window.onload = () => {
 
         field.classList.remove("hide");
         field.innerHTML = "Canceled login, please retry.";
-
-        throw err;
       }
     })
   });

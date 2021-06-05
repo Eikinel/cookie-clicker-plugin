@@ -149,7 +149,10 @@ async function listSaves(options) {
             });
         })
     })
-    .catch((err) => new Snackbar('List save error', `An error occured while fetching save files : ${err}`));
+    .catch((err) => {
+        new Snackbar('List save error', `An error occured while fetching save files : ${err}`);
+        listDiv.innerHTML = '<span class="text-red text-12">Could not refresh, please retry.</div>'
+    });
 }
 
 
