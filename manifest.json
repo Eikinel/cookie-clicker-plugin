@@ -2,9 +2,10 @@
     "name": "Cookie Clicker Share",
     "version": "1.0.0",
     "description": "Store and share Cookie Clicker saves between devices",
-    "permissions": ["activeTab", "storage", "identity"],
+    "permissions": ["activeTab", "storage", "identity", "scripting"],
+    "host_permissions": ["*://orteil.dashnet.org/cookieclicker/*"],
     "oauth2": {
-      "client_id": "457978225628-15224bracb4e1hvmkk0fipaqmjl0itdm.apps.googleusercontent.com",
+      "client_id": "457978225628-17m0dautimr8bh3cc3ba37uio6km8epq.apps.googleusercontent.com",
       "scopes": [
         "https://www.googleapis.com/auth/drive.file",
         "https://www.googleapis.com/auth/drive.appdata",
@@ -14,8 +15,8 @@
     },
     "content_scripts": [
       {
-        "matches": ["*://orteil.dashnet.org/cookieclicker/"],
-        "js": ["scripts/content_scripts/message_listener.js"]
+        "matches": ["*://orteil.dashnet.org/cookieclicker/*"],
+        "js": ["scripts/message_listener.js"]
       }
     ],
     "action": {
