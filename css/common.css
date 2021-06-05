@@ -147,6 +147,21 @@ a.option.disabled {
     cursor: default !important;
 }
 
+.framed, a.option.framed {
+    padding: 0.75rem 1.5rem 0.75rem 1rem;
+    margin: 0.1rem;
+    background: #000 url('../images/popup/dark_noise.jpg');
+    background-image: url('../images/popup/shaded_borders_soft.png'),url('../images/popup/dark_noise.jpg');
+    background-size: 100% 100%,auto;
+    border: 3px solid transparent;
+    border-image: url(../images/popup/frameBorder.png) 3 round;
+    border-radius: 2px;
+    box-shadow: 0px 0px 1px 2px rgb(0 0 0 / 50%), 0px 2px 4px rgb(0 0 0 / 25%), 0px 0px 6px 1px rgb(0 0 0 / 50%) inset;
+    transition: opacity 0.1s ease-out;
+    color: #ccc;
+    word-break: break-word;
+}
+
 input {
     background-image: url('../images/popup/store_tiles.jpg');
     background-repeat: no-repeat;
@@ -158,9 +173,9 @@ input[type="button"] {
 }
 
 .fill {
-    margin: 10px;
+    margin: 10px 18px 10px 10px;
     position: relative;
-    width: calc(100% - 20px);
+    width: calc(100% - 28px);
 }
 
 .hide {

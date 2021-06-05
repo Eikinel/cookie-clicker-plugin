@@ -1,3 +1,8 @@
+const UI_FEEDBACK_ELEMENT = {
+    SNACKBAR: 'snackbar',
+    DIALOG: 'dialog',
+}
+
 var UIFeedbacksQueue = {};
 
 class UIFeedback {
@@ -9,7 +14,7 @@ class UIFeedback {
         this.animationSpeed = 300;
         this.elem = document.createElement('div');
         this.elem.id = `${this.type}-${this.id}`;
-        this.elem.classList.add(this.type, 'fade-in', 'position-relative');
+        this.elem.classList.add(this.type, 'fade-in', 'position-relative', 'framed');
         
         if (!UIFeedbacksQueue[type]) {
             UIFeedbacksQueue[type] = [];
@@ -21,13 +26,13 @@ class UIFeedback {
     close(timeout = 0) {
         setTimeout(() => this.elem.classList.add('fade-out'), timeout); 
         setTimeout(() => {
-            // Checks snackbar existence
+            // Checks UI element existence in DOM
             if (document.getElementById(`${this.type}-${this.id}`)) {
                 switch (this.type) {
-                    case 'snackbar':
+                    case UI_FEEDBACK_ELEMENT.SNACKBAR:
                         document.getElementById('snackbar-overlay').removeChild(this.elem);
                         break;
-                     case 'dialog': 
+                     case UI_FEEDBACK_ELEMENT.DIALOG: 
                         document.getElementById('dialog-container').remove();
                         break;
                 }
@@ -38,8 +43,8 @@ class UIFeedback {
 }
 
 class Snackbar extends UIFeedback {
-    constructor(title, content = '', timeout = 3000) {
-        super('snackbar', title, content);
+    constructor(title, content = '', timeout = 30000000) {
+        super(UI_FEEDBACK_ELEMENT.SNACKBAR, title, content);
         
         this.timeout = timeout;
         this.elem.innerHTML = `
@@ -61,7 +66,7 @@ class Snackbar extends UIFeedback {
 
 class Dialog extends UIFeedback {
     constructor(title, content, buttons = [], options = { hasBackdrop: true }) {
-        super('dialog', title, content);
+        super(UI_FEEDBACK_ELEMENT.DIALOG, title, content);
 
         // Parent container setup
         const parent = document.createElement('div');
@@ -110,6 +115,6 @@ class Dialog extends UIFeedback {
     }
 
     async onClose(callback) {
-        return new Promise((resolve) => Promise.race(this.buttonListeners).then((value) => resolve(callback(value))));
+        return new Promise((resolve) => Promise.any(this.buttonListeners).then((value) => resolve(callback(value))));
     }
 }
