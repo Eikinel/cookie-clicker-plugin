@@ -1,4 +1,4 @@
-let autoclickFn;
+let autoclickFns = [];
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch (request.type) {
@@ -18,9 +18,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             break;
         case "AUTOCLICK":
             if (request.toggled) {
-                autoclickFn = setInterval(() => document.querySelector("#bigCookie").click(), 0);
+                autoclickFns.push(setInterval(() => document.querySelector("#bigCookie").click(), 0));
+                autoclickFns.push(setInterval(() => [...document.getElementsByClassName('shimmer')].forEach((shimmer) => shimmer.click()), 1000));
             } else {
-                clearTimeout(autoclickFn);
+                autoclickFns.forEach((fn) => clearTimeout(fn));
             }
 
             break;
