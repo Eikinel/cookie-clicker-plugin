@@ -80,7 +80,6 @@ class Dialog extends UIFeedback {
             'align-items-center',
             'justify-content-center',
             'position-absolute',
-            'backdrop',
             'h-100',
         );
         document.body.appendChild(parent);

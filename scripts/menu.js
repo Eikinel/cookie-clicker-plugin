@@ -1,6 +1,5 @@
 const SAVE_FOLDER = "Cookie Clicker Share";
 const EXTENSION = ".cookie";
-let autoClickToggled = false;
 let wrapperCache;
 
 // Check authentication
@@ -12,6 +11,8 @@ window.onload = async function() {
     });
 
     setLoader('avatar', pGetUserInfo);
+
+    document.querySelector("#auto-click").innerHTML = `Autoclick: ${Boolean(chrome.storage.local.get('autoclick')) ? 'ON' : 'OFF'}`;
 
     // Buttons listeners
     addActionEventListener('open-tab', () => openTab());
@@ -30,31 +31,25 @@ async function createSave() {
     let bakeryName;
     const wrapper = await crudRequestWrapper();
     
-    return new Promise((resolve) => {
-        chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tabs) => resolve(tabs))
-    })
-    .then((tabs) => {
-        return new Promise((resolve, reject) => {
-            if (tabs && tabs[0]) {
-                chrome.tabs.sendMessage(tabs[0].id, { type: "SAVE" }, (res) => {
-                    console.log(bakeryName);
-                    bakeryName = res.bakeryName;
-                    setTimeout(() => chrome.scripting.executeScript(
-                        { 
-                            target: { tabId: tabs[0].id },
-                            function: getGameHash,
-                        },
-                        (gameHash) => resolve({
-                            bakeryName: res.bakeryName,
-                            gameHash: gameHash[0].result
-                        })
-                    ), 500);
-                });
-            } else {
-                reject("Cookie Clicker is not opened in any tab, the game cannot be saved.");
-            }
+    return getTab()
+    .then((tab) => {
+        return new Promise((resolve) => {
+            chrome.tabs.sendMessage(tab.id, { type: "SAVE" }, (res) => {
+                bakeryName = res.bakeryName;
+                setTimeout(() => chrome.scripting.executeScript(
+                    { 
+                        target: { tabId: tab.id },
+                        function: getGameHash,
+                    },
+                    (gameHash) => resolve({
+                        bakeryName: res.bakeryName,
+                        gameHash: gameHash[0].result
+                    })
+                ), 500);
+            });
         });
     })
+    .catch(() => { throw "Cookie Clicker is not opened in any tab, the game cannot be saved." })
     .then((res) => {
         const form = new FormData();
         const file = new Blob([res.gameHash], { type: 'text/plain' });
@@ -167,29 +162,24 @@ async function listSaves(options) {
 async function updateSave(fileId, filename) {
     const token = await getAuthToken();
     
-    return new Promise((resolve) => {
-        chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tabs) => resolve(tabs))
-    })
-    .then((tabs) => {
-        return new Promise((resolve, reject) => {
-            if (tabs && tabs[0]) {
-                chrome.tabs.sendMessage(tabs[0].id, { type: "SAVE" }, (res) => {
-                    setTimeout(() => chrome.scripting.executeScript(
-                        { 
-                            target: { tabId: tabs[0].id },
-                            function: getGameHash,
-                        },
-                        (gameHash) => resolve({
-                            bakeryName: res.bakeryName,
-                            gameHash: gameHash[0].result
-                        })
-                    ), 500);
-                });
-            } else {
-                reject("Cookie Clicker is not opened in any tab, the game cannot be saved.");
-            }
+    return getTab()
+    .then((tab) => {
+        return new Promise((resolve) => {
+            chrome.tabs.sendMessage(tab.id, { type: "SAVE" }, (res) => {
+                setTimeout(() => chrome.scripting.executeScript(
+                    { 
+                        target: { tabId: tab.id },
+                        function: getGameHash,
+                    },
+                    (gameHash) => resolve({
+                        bakeryName: res.bakeryName,
+                        gameHash: gameHash[0].result
+                    })
+                ), 500);
+            });
         });
     })
+    .catch(() => { throw "Cookie Clicker is not opened in any tab, the game cannot be saved." })
     .then((res) => {
         return fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}`, {
             method: 'PATCH',
@@ -242,42 +232,24 @@ async function deleteSave(fileId, filename) {
 }
 
 async function useSave(fileId, filename) {
-    const token = await getAuthToken();
-
-    const pGameHash = fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-        headers: getHeaders(token)
-    })
-    .then((res) => res.text())
-
-    const pTabs = new Promise((resolve) => {
-        chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, (tabs) => resolve(tabs))
-    })
-
-    return Promise.all([pGameHash, pTabs])
-    .then(([gameHash, tabs]) => {
-        if (tabs && tabs[0]) {
-            chrome.tabs.sendMessage(tabs[0].id, {
-                type: "LOAD",
-                gameHash: gameHash
-            });
-            new Snackbar('', `Game "${filename}" has been loaded`);
-        } else {
-            throw 'Cookie Clicker is not opened in any tab, the game cannot be loaded.';
-        }
+    return Promise.all([readSave(fileId), getTab()])
+    .then(([gameHash, tab]) => {
+        chrome.tabs.sendMessage(tab.id, {
+            type: "LOAD",
+            gameHash: gameHash
+        });
+        new Snackbar('', `Game "${filename}" has been loaded`);
     })
     .catch((err) => new Snackbar('Loading error', `An error occured while reading save file : ${err}`));
 }
 
-async function copySaveToClipboard(fileId) {
+async function readSave(fileId) {
     const token = await getAuthToken();
-    
+
     return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
         headers: getHeaders(token)
     })
-    .catch((err) => new Snackbar('Copy error', `An error occured while copying save to clipboard : ${err}`))
     .then((res) => res.text())
-    .then((gameHash) => navigator.clipboard.writeText(gameHash))
-    .finally(() => new Snackbar('', 'Save copied to clipboard'));
 }
 
 
@@ -298,6 +270,18 @@ async function crudRequestWrapper() {
 
         return wrapperCache;
     });
+}
+
+async function copySaveToClipboard(fileId) {
+    const token = await getAuthToken();
+    
+    return fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        headers: getHeaders(token)
+    })
+    .catch((err) => new Snackbar('Copy error', `An error occured while copying save to clipboard : ${err}`))
+    .then((res) => res.text())
+    .then((gameHash) => navigator.clipboard.writeText(gameHash))
+    .finally(() => new Snackbar('', 'Save copied to clipboard'));
 }
 
 async function getSaveFolderId(token) {
@@ -333,20 +317,23 @@ async function getTab() {
     return new Promise((resolve, reject) => chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, ([tab]) => (tab ? resolve : reject)(tab)))
 }
 
-function openTab() {
+async function openTab() {
     getTab()
     .then((tab) => chrome.tabs.update(tab.id, { highlighted: true }))
     .catch(() => chrome.tabs.create({ url: 'https://orteil.dashnet.org/cookieclicker/' }));
 }
 
-function toggleAutoClick() {
+async function toggleAutoClick() {
     getTab()
+    .catch(() => { throw 'Cookie Clicker is not opened in any tab, cannot toggle autoclick.' })
     .then((tab) => {
-        autoClickToggled = !autoClickToggled;
-        document.querySelector("#auto-click").innerHTML = `Autoclick: ${autoClickToggled ? 'ON' : 'OFF'}`;
-        chrome.tabs.sendMessage(tab.id, { type: "AUTOCLICK", toggled: autoClickToggled });
+        const autoclick = !Boolean(chrome.storage.local.get('autoclick'));
+
+        chrome.tabs.sendMessage(tab.id, { type: "AUTOCLICK", toggled: autoclick });
+        chrome.storage.local.set({ autoclick: autoclick });
+        document.querySelector("#auto-click").innerHTML = `Autoclick: ${autoclick ? 'ON' : 'OFF'}`;
     })
-    .catch(() => new Snackbar('Cookie Clicker is not opened in any tab, the game cannot be loaded.'));
+    .catch((err) => new Snackbar('Toggle autoclick error', `An error occured while toggling autoclick : ${err}`));
 }
 
 function getGameHash() {

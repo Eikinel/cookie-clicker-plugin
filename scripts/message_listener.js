@@ -15,7 +15,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendResponse({ bakeryName: bakeryName });
             break;
         case "AUTOCLICK":
-            document.querySelector("#bigCookie").click();
+            console.log(request);
+            while (request.toggled) {
+                console.log("CLICK");
+                document.querySelector("#bigCookie").click();
+            }
 
             break;
         default:
