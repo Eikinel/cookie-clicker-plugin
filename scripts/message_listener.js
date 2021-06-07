@@ -1,3 +1,5 @@
+let autoclickFn;
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch (request.type) {
         case "LOAD":
@@ -15,10 +17,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendResponse({ bakeryName: bakeryName });
             break;
         case "AUTOCLICK":
-            console.log(request);
-            while (request.toggled) {
-                console.log("CLICK");
-                document.querySelector("#bigCookie").click();
+            if (request.toggled) {
+                autoclickFn = setInterval(() => document.querySelector("#bigCookie").click(), 0);
+            } else {
+                clearTimeout(autoclickFn);
             }
 
             break;

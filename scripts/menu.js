@@ -12,7 +12,9 @@ window.onload = async function() {
 
     setLoader('avatar', pGetUserInfo);
 
-    document.querySelector("#auto-click").innerHTML = `Autoclick: ${Boolean(chrome.storage.local.get('autoclick')) ? 'ON' : 'OFF'}`;
+    chrome.storage.local.get(['autoclick'], (storage) => {
+        document.querySelector("#auto-click").innerHTML = `Autoclick: ${Boolean(storage.autoclick) ? 'ON' : 'OFF'}`;
+    });
 
     // Buttons listeners
     addActionEventListener('open-tab', () => openTab());
@@ -327,11 +329,12 @@ async function toggleAutoClick() {
     getTab()
     .catch(() => { throw 'Cookie Clicker is not opened in any tab, cannot toggle autoclick.' })
     .then((tab) => {
-        const autoclick = !Boolean(chrome.storage.local.get('autoclick'));
-
-        chrome.tabs.sendMessage(tab.id, { type: "AUTOCLICK", toggled: autoclick });
-        chrome.storage.local.set({ autoclick: autoclick });
-        document.querySelector("#auto-click").innerHTML = `Autoclick: ${autoclick ? 'ON' : 'OFF'}`;
+        chrome.storage.local.get(['autoclick'], (storage) => {
+            storage.autoclick = !Boolean(storage.autoclick);
+            chrome.tabs.sendMessage(tab.id, { type: "AUTOCLICK", toggled: storage.autoclick });
+            chrome.storage.local.set({ autoclick: storage.autoclick });
+            document.querySelector("#auto-click").innerHTML = `Autoclick: ${storage.autoclick ? 'ON' : 'OFF'}`;
+        });
     })
     .catch((err) => new Snackbar('Toggle autoclick error', `An error occured while toggling autoclick : ${err}`));
 }
