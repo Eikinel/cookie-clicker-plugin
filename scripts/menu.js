@@ -1,5 +1,6 @@
 const SAVE_FOLDER = "Cookie Clicker Share";
 const EXTENSION = ".cookie";
+let autoClickToggled = false;
 let wrapperCache;
 
 // Check authentication
@@ -14,6 +15,7 @@ window.onload = async function() {
 
     // Buttons listeners
     addActionEventListener('open-tab', () => openTab());
+    addActionEventListener('auto-click', () => toggleAutoClick());
     addActionEventListener('logout', () => getAuthToken().then((token) => logout(token)));
     addActionEventListener('refresh-list', () => listSaves({ loader: true }).then(() => new Snackbar('', 'Saves has been refreshed')));
     addActionEventListener('new-save', () => createSave().then((res) => listSaves()));
@@ -327,16 +329,24 @@ async function getSaveFolderId(token) {
     .catch((err) => new Snackbar('Fetch error', `An error occured while fetching game data : ${err}`))
 }
 
+async function getTab() {
+    return new Promise((resolve, reject) => chrome.tabs.query({ url: "*://orteil.dashnet.org/cookieclicker/" }, ([tab]) => (tab ? resolve : reject)(tab)))
+}
+
 function openTab() {
-    chrome.tabs.query({ url: 'https://orteil.dashnet.org/cookieclicker/' }, ([tab]) => {
-        console.log(tab);
-        if (!tab) {
-            chrome.tabs.create({ url: 'https://orteil.dashnet.org/cookieclicker/' });
-            return;
-        }
-    
-        chrome.tabs.update(tab.id, { highlighted: true });
-    });
+    getTab()
+    .then((tab) => chrome.tabs.update(tab.id, { highlighted: true }))
+    .catch(() => chrome.tabs.create({ url: 'https://orteil.dashnet.org/cookieclicker/' }));
+}
+
+function toggleAutoClick() {
+    getTab()
+    .then((tab) => {
+        autoClickToggled = !autoClickToggled;
+        document.querySelector("#auto-click").innerHTML = `Autoclick: ${autoClickToggled ? 'ON' : 'OFF'}`;
+        chrome.tabs.sendMessage(tab.id, { type: "AUTOCLICK", toggled: autoClickToggled });
+    })
+    .catch(() => new Snackbar('Cookie Clicker is not opened in any tab, the game cannot be loaded.'));
 }
 
 function getGameHash() {

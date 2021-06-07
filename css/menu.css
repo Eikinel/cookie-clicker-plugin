@@ -17,6 +17,12 @@
     left: 10px;
 }
 
+#auto-click {
+    position: absolute;
+    top: 40px;
+    left: 10px;
+}
+
 #save-list {
     margin: 10px 0;
 }
