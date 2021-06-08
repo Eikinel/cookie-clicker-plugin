@@ -36,8 +36,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     
             if (request.toggled) {
                 autoFns.buy.push(setInterval(() => {
-                    [...document.getElementsByClassName('product unlocked enabled')]?.reverse()[0]?.click();
-                }, 2000));
+                    [...document.getElementsByClassName('product unlocked enabled')]?.reverse()?.forEach((product) => product.click());
+                }, 60000));
             }
     
             break;
