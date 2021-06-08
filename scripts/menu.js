@@ -14,14 +14,16 @@ window.onload = async function() {
 
     // Buttons listeners
     addActionEventListener('open-tab', () => openTab());
-    addActionEventListener('auto-click', () => toggleAutoClick());
     addActionEventListener('logout', () => getAuthToken().then((token) => logout(token)));
     addActionEventListener('refresh-list', () => listSaves({ loader: true }).then(() => new Snackbar('', 'Saves has been refreshed')));
     addActionEventListener('new-save', () => createSave().then((res) => listSaves()));
+    ['click', 'buy', 'upgrade'].forEach((type) => {
+        addActionEventListener(`auto-${type}`, () => toggleAuto(type));
+        useAuto(type);
+    });
 
     // List user's saves from Drive
     listSaves({ loader: true });
-    useAutoClick();
 }
 
 
@@ -322,27 +324,28 @@ async function openTab() {
     .catch(() => chrome.tabs.create({ url: 'https://orteil.dashnet.org/cookieclicker/' }));
 }
 
-async function getAutoClick() {
-    return new Promise((resolve) => chrome.storage.local.get(['autoclick'], (storage) => {
-        document.querySelector("#auto-click").innerHTML = `Autoclick: ${storage.autoclick ? 'ON' : 'OFF'}`;
-        resolve(storage.autoclick);
+async function getAuto(type) {
+    const storageKey = `auto${type}`;
+
+    return new Promise((resolve) => chrome.storage.local.get([storageKey], (storage) => {
+        document.querySelector(`#auto-${type}`).innerHTML = `Auto${type}: ${storage[storageKey] ? 'ON' : 'OFF'}`;
+        resolve(storage[storageKey]);
     }));
 }
 
-async function setAutoClick(autoclick) {
-    chrome.storage.local.set({ autoclick: autoclick });
-    return useAutoClick(autoclick);
+async function setAuto(type, value) {
+    chrome.storage.local.set({ [`auto${type}`]: value });
+    return useAuto(type);
 }
 
-async function toggleAutoClick() {
-    return getAutoClick().then((autoclick) => setAutoClick(!Boolean(autoclick)))
+async function toggleAuto(type) {
+    return getAuto(type).then((value) => setAuto(type, !Boolean(value)))
 }
 
-async function useAutoClick() {
-    return Promise.all([getTab(), getAutoClick()])
-    .then(([tab, autoclick]) => {
-        console.log(tab, autoclick);
-        chrome.tabs.sendMessage(tab.id, { type: "AUTOCLICK", autoclick: autoclick })
+async function useAuto(type) {
+    return Promise.all([getTab(), getAuto(type)])
+    .then(([tab, value]) => {
+        chrome.tabs.sendMessage(tab.id, { type: `AUTO${type.toUpperCase()}`, toggled: value })
     })
     .catch(() => {})
 }
