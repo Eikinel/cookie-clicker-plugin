@@ -17,11 +17,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendResponse({ bakeryName: bakeryName });
             break;
         case "AUTOCLICK":
-            if (request.toggled) {
+            autoclickFns.forEach((fn) => clearTimeout(fn));
+
+            if (request.autoclick) {
                 autoclickFns.push(setInterval(() => document.querySelector("#bigCookie").click(), 0));
                 autoclickFns.push(setInterval(() => [...document.getElementsByClassName('shimmer')].forEach((shimmer) => shimmer.click()), 1000));
-            } else {
-                autoclickFns.forEach((fn) => clearTimeout(fn));
             }
 
             break;
